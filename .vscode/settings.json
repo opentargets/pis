@@ -21,9 +21,8 @@
   },
   "autoDocstring.docstringFormat": "sphinx",
   "yaml.schemas": {
-    "./.vscode/config-schema.json": [
+    "https://raw.githubusercontent.com/opentargets/otter/refs/heads/main/.vscode/config-schema.json": [
       "config.yaml"
     ]
   }
 }
-// TODO: FIX CONFIG SCHEMA PATH

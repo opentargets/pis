@@ -1,28 +1,29 @@
 [project]
 name = "PIS"
-version = "25.0.1-rc.1"
-description = "Open Targets Pipeline Input Stage application"
+version = "25.1.0-rc.1"
+description = "Open Targets Pipeline Input Stage"
 readme = "README.md"
 requires-python = ">=3.13"
-authors = [{ name = "Open Targets core team", email = "devs@opentargets.net" }]
+authors = [{ name = "Open Targets Core Team", email = "devs@opentargets.net" }]
 license = { text = "Apache-2.0" }
 dependencies = [
-  "elasticsearch==7.17.12",       # must be ^7.0.0 to be compatible with chembl es server
-  "filelock==3.16.1",
-  "google-cloud-storage==2.19.0",
+  "elasticsearch==7.17.12",      # must be ^7.0.0 to be compatible with chembl es server
+  "filelock==3.17.0",
+  "google-cloud-storage==3.0.0",
   "jq==1.8.0",
   "loguru==0.7.3",
-  "pydantic==2.10.4",
+  "opentargets-otter==25.0.0a1",
+  "pydantic==2.10.6",
   "PyYAML==6.0.2",
   "requests==2.32.3",
-  "urllib3==2.3.0",               # must be <= 2 for elasticsearch, see overrides
+  "urllib3==2.3.0",              # must be <= 2 for elasticsearch, see overrides
 ]
 
 [tool.uv]
 override-dependencies = ["urllib3>=2.2.0"]
 
 [dependency-groups]
-dev = ["ruff==0.8.6", "deptry==0.21.2"]
+dev = ["ruff==0.9.6", "deptry==0.23.0"]
 
 [project.optional-dependencies]
 test = [
@@ -37,6 +38,7 @@ docs = [
   "sphinx-issues>=5.0.0",
   "sphinx-rtd-theme>=3.0.2",
   "sphinx>=8.1.3",
+  "esbonio>=0.16.5",
 ]
 
 [build-system]
@@ -51,15 +53,12 @@ exclude = ["**/*_test.py"]
 
 [project.scripts]
 pis = "pis.core:main"
-pipeline_input_stage = "pis.core:main"
-platform_input_support = "pis.core:main" # legacy name
 
 [tool.pytest.ini_options]
-testpaths = ["src/pis"]
+testpaths = ["test/pis"]
 filterwarnings = "ignore:.*google._upb*" # warning from google protobuf library
 
 [tool.coverage.report]
-omit = ["src/pis/**/*_test.py"]
 exclude_lines = ["pragma: no cover", "if TYPE_CHECKING:"]
 
 [tool.deptry]
@@ -113,7 +112,7 @@ select = [
 ]
 
 ignore = [
-  'D107',    # we don't want to document every single init method
+  'D1',      # allow lax documentation
   'D213',    # we prefer D212
   'G004',    # we don't care about logging format
   'E226',    # allow omitting whitespace around arithmetic operators

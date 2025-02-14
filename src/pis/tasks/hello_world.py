@@ -1,18 +1,14 @@
 """Simple hello world task."""
 
-from dataclasses import dataclass
-from pathlib import Path
-from threading import Event
 from typing import Self
 
 from loguru import logger
+from otter.manifest.model import Artifact
+from otter.task.model import Spec, Task, TaskContext
+from otter.task.task_reporter import report
 
-from pis.tasks import Resource, Task, TaskDefinition, report, v
-from pis.validators.file import file_exists
 
-
-@dataclass
-class HelloWorldDefinition(TaskDefinition):
+class HelloWorldSpec(Spec):
     """Configuration fields for the hello_world task.
 
     This task has the following custom configuration fields:
@@ -25,26 +21,19 @@ class HelloWorldDefinition(TaskDefinition):
 class HelloWorld(Task):
     """Simple hello world task."""
 
-    def __init__(self, definition: TaskDefinition):
-        super().__init__(definition)
-        self.definition: HelloWorldDefinition
+    def __init__(self, spec: HelloWorldSpec, context: TaskContext) -> None:
+        super().__init__(spec, context)
+        self.spec: HelloWorldSpec
 
     @report
-    def run(self, *, abort: Event) -> Self:
-        # configure
-        who = self.definition.who
-
-        # write a example string to the destination file
-        output_file = Path(self.definition.destination)
-        output_file.write_text(f'Hello, {who}!')
-
+    def run(self) -> Self:
+        # write log
+        logger.info(f'hello, {self.spec.who}!')
         # set the resource
-        self.resource = Resource(source='hello_world', destination=str(output_file))
+        self.resource = Artifact(source='me', destination=self.spec.who)
 
-        logger.info(f'completed task hello_world for {who}')
         return self
 
     @report
-    def validate(self, *, abort: Event) -> Self:
-        v(file_exists, self.definition.destination)
+    def validate(self) -> Self:
         return self

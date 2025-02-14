@@ -6,11 +6,9 @@ from pathlib import Path
 from elasticsearch import Elasticsearch as Es
 from loguru import logger
 
-from pis.util.fs import absolute_path
-
 
 # fastest way to count lines is calling wc -l
-def _wccount(filename):
+def _wccount(filename) -> int:
     out = subprocess.Popen(
         ['/usr/bin/wc', '-l', filename],
         stdout=subprocess.PIPE,
@@ -36,7 +34,7 @@ def counts(url: str, index: str, local_path: Path) -> bool:
 
     es = Es(url)
     remote_doc_count = es.count(index=index)['count']
-    local_doc_count = _wccount(absolute_path(local_path))
+    local_doc_count = _wccount(local_path)
 
     logger.debug(f'checking if {remote_doc_count} == {local_doc_count}')
     return remote_doc_count == local_doc_count

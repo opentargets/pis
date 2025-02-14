@@ -101,7 +101,7 @@ One execution of PIS will perform the following:
 2. Load the available tasks into a registry.
 3. Ensure the local work directory exists and is writable.
 4. Run the step, which is divided into four phases:
-   1. **Initialization**: A series of _pretasks_ that prepare the execution of the step. Examples are
+   1. **Initialization**: A series of _PreTasks_ that prepare the execution of the step. Examples are
        getting a file list, or dynamically spawning more tasks to run in the main phase.
    2. **Staging**: Main phase of the step. It is made of _tasks_ that perform the actual work. Examples of
        tasks are downloading a file from a remote location, or fetching an index from elasticsearch.
@@ -112,8 +112,8 @@ One execution of PIS will perform the following:
 > [!IMPORTANT]
 In the staging, validation and upload phases, the tasks are run in parallel.
 
-## Pretasks and Tasks
-Pretasks and tasks are defined in the `tasks` module. They both inherit from a base class that provides
+## PreTasks and Tasks
+PreTasks and tasks are defined in the `tasks` module. They both inherit from a base class that provides
 some common functionality and defines the interface that a task must implement.
 
 A task is a class that defines a `run` method. This method is called by the pipeline runner and is
@@ -147,7 +147,7 @@ PIS will spawn a `Download` task with the arguments `source` and `destination`.
 Each task can have a different set of arguments, which are defined in `TaskDefinition` class. There are
 two requirements for the arguments of a task:
 
-* __All__ tasks, including pretasks, must have a `name` argument, for obvious reasons.
+* __All__ tasks, including PreTasks, must have a `name` argument, for obvious reasons.
 * __Main__ tasks must have a `destination` argument. This is to remember implementers that the purpose
   of a task is to generate something that will be used by the next step in the pipeline.
 

@@ -500,7 +500,7 @@ steps:
 
   #: SO STEP :######################################################################################
   so:
-    - name: download sequence ontology
+    - name: copy sequence ontology
       source: https://raw.githubusercontent.com/The-Sequence-Ontology/SO-Ontologies/master/Ontology_Files/so.json
       destination: input/so/so.json
   ##################################################################################################

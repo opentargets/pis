@@ -16,7 +16,7 @@ from otter.storage import get_remote_storage
 from otter.task.model import Spec, Task, TaskContext
 from otter.task.task_reporter import report
 from otter.util.errors import OtterError, TaskAbortedError
-from otter.util.fs import check_fs
+from otter.util.fs import check_destination
 from otter.validators import v
 
 from pis.validators.elasticsearch import counts
@@ -92,7 +92,7 @@ class Elasticsearch(Task):
 
     @report
     def run(self) -> Self:
-        check_fs(self.local_path)
+        check_destination(self.local_path, delete=True)
 
         logger.debug(f'connecting to elasticsearch at {self.spec.url}')
         try:

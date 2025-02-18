@@ -1,6 +1,6 @@
 [project]
 name = "PIS"
-version = "25.1.0-rc.1"
+version = "25.1.0-rc.2"
 description = "Open Targets Pipeline Input Stage"
 readme = "README.md"
 requires-python = ">=3.13"
@@ -8,15 +8,9 @@ authors = [{ name = "Open Targets Core Team", email = "devs@opentargets.net" }]
 license = { text = "Apache-2.0" }
 dependencies = [
   "elasticsearch==7.17.12",      # must be ^7.0.0 to be compatible with chembl es server
-  "filelock==3.17.0",
-  "google-cloud-storage==3.0.0",
   "jq==1.8.0",
   "loguru==0.7.3",
-  "opentargets-otter==25.0.0a1",
-  "pydantic==2.10.6",
-  "PyYAML==6.0.2",
-  "requests==2.32.3",
-  "urllib3==2.3.0",              # must be <= 2 for elasticsearch, see overrides
+  "opentargets-otter==25.0.0a4",
 ]
 
 [tool.uv]
@@ -66,7 +60,7 @@ extend_exclude = ["[0-9a-zA-Z_/]+_test.py"]
 pep621_dev_dependency_groups = ["dev", "test", "docs"]
 
 [tool.ruff]
-target-version = 'py312'
+target-version = 'py313'
 line-length = 120
 preview = true
 

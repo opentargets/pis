@@ -459,7 +459,7 @@ wheels = [
 
 [[package]]
 name = "opentargets-otter"
-version = "25.0.0a1"
+version = "25.0.0a4"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "filelock" },
@@ -470,9 +470,9 @@ dependencies = [
     { name = "requests" },
     { name = "urllib3" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/ed/f9/c80a68b30db86a6a9d9e1521258b53fbd8192baebff8f1437a7cda846ef9/opentargets_otter-25.0.0a1.tar.gz", hash = "sha256:328e1337a427595b11275df1b476dee446c7b5153c9c651bc89bf02b1009bf5d", size = 73085 }
+sdist = { url = "https://files.pythonhosted.org/packages/bd/c8/b79922076e4598beeb322202ff35a2ea9a1f0c2a64686c3e02954b478b79/opentargets_otter-25.0.0a4.tar.gz", hash = "sha256:5ed5e79d188fd01ea38f7632bfad5f6ea9c3476821431413d5d5b759128c83c9", size = 76392 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/b7/a5/9501bde5b0d26c75ebf243f46c26248d64f17a4efcc17cd510248e39724b/opentargets_otter-25.0.0a1-py3-none-any.whl", hash = "sha256:15ad5974c08b65b97088de85e0682a78ae094729e92659efef8fc0303a8bad81", size = 39761 },
+    { url = "https://files.pythonhosted.org/packages/9f/c1/08a109f982feca7853067c095f6c7c50f7db207632b85cbbbda527d8342c/opentargets_otter-25.0.0a4-py3-none-any.whl", hash = "sha256:c08e10d156dd3be550c63832050f17a11255d4e908de097374d999ffd1358f71", size = 43354 },
 ]
 
 [[package]]
@@ -486,19 +486,13 @@ wheels = [
 
 [[package]]
 name = "pis"
-version = "25.0.1rc1"
+version = "25.1.0rc2"
 source = { editable = "." }
 dependencies = [
     { name = "elasticsearch" },
-    { name = "filelock" },
-    { name = "google-cloud-storage" },
     { name = "jq" },
     { name = "loguru" },
     { name = "opentargets-otter" },
-    { name = "pydantic" },
-    { name = "pyyaml" },
-    { name = "requests" },
-    { name = "urllib3" },
 ]
 
 [package.optional-dependencies]
@@ -529,22 +523,16 @@ requires-dist = [
     { name = "coverage", marker = "extra == 'test'", specifier = "==7.6.10" },
     { name = "elasticsearch", specifier = "==7.17.12" },
     { name = "esbonio", marker = "extra == 'docs'", specifier = ">=0.16.5" },
-    { name = "filelock", specifier = "==3.17.0" },
     { name = "freezegun", marker = "extra == 'test'", specifier = "==1.5.1" },
-    { name = "google-cloud-storage", specifier = "==3.0.0" },
     { name = "jq", specifier = "==1.8.0" },
     { name = "loguru", specifier = "==0.7.3" },
-    { name = "opentargets-otter", specifier = "==25.0.0a1" },
-    { name = "pydantic", specifier = "==2.10.6" },
+    { name = "opentargets-otter", specifier = "==25.0.0a4" },
     { name = "pytest", marker = "extra == 'test'", specifier = "==8.3.4" },
     { name = "pytest-mock", marker = "extra == 'test'", specifier = "==3.14.0" },
-    { name = "pyyaml", specifier = "==6.0.2" },
-    { name = "requests", specifier = "==2.32.3" },
     { name = "sphinx", marker = "extra == 'docs'", specifier = ">=8.1.3" },
     { name = "sphinx-autobuild", marker = "extra == 'docs'", specifier = ">=2024.10.3" },
     { name = "sphinx-issues", marker = "extra == 'docs'", specifier = ">=5.0.0" },
     { name = "sphinx-rtd-theme", marker = "extra == 'docs'", specifier = ">=3.0.2" },
-    { name = "urllib3", specifier = "==2.3.0" },
 ]
 
 [package.metadata.requires-dev]

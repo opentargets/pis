@@ -459,7 +459,7 @@ wheels = [
 
 [[package]]
 name = "opentargets-otter"
-version = "25.0.0a6"
+version = "25.0.0a7"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "filelock" },
@@ -470,9 +470,9 @@ dependencies = [
     { name = "requests" },
     { name = "urllib3" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/06/b9/e9608d3bec17cf6314bc9bc9598c6af107003dca0b281b109c84e2f35367/opentargets_otter-25.0.0a6.tar.gz", hash = "sha256:841e5efd436c2ca7a06156db256c88c01bb2252444611fb65916bb5f06d5ad0a", size = 74019 }
+sdist = { url = "https://files.pythonhosted.org/packages/38/7e/890ee2076926fdb8d7f723c8d871cfaf26ada7547cd57a1109c6229602c2/opentargets_otter-25.0.0a7.tar.gz", hash = "sha256:37d947bf1437a04094736a7a63d0ac3a77a0eb198097673f52a4dede9f1dce83", size = 74021 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/f8/68/493699eb838e3516a5b9b7b20bd176edf2a8b46d4fc839079971d9b9e07c/opentargets_otter-25.0.0a6-py3-none-any.whl", hash = "sha256:5edeb17a32fb0bb31a532f455cf78cb6b3e77229b265320a7f6d0e0fadc1bc0f", size = 48977 },
+    { url = "https://files.pythonhosted.org/packages/0a/cc/0fe4cb6e1980280e134d125a2c4a75593dd58d0b1feadc17f2eb149d8779/opentargets_otter-25.0.0a7-py3-none-any.whl", hash = "sha256:08f187ac39c6b16f150444f29f707a6667d2b6ad916df29a30181e4cd0a50e52", size = 48975 },
 ]
 
 [[package]]
@@ -486,7 +486,7 @@ wheels = [
 
 [[package]]
 name = "pis"
-version = "25.2.0a2"
+version = "25.2.0a3"
 source = { editable = "." }
 dependencies = [
     { name = "elasticsearch" },
@@ -526,7 +526,7 @@ requires-dist = [
     { name = "freezegun", marker = "extra == 'test'", specifier = "==1.5.1" },
     { name = "jq", specifier = "==1.8.0" },
     { name = "loguru", specifier = "==0.7.3" },
-    { name = "opentargets-otter", specifier = "==25.0.0a6" },
+    { name = "opentargets-otter", specifier = ">=25.0.0a7" },
     { name = "pytest", marker = "extra == 'test'", specifier = "==8.3.4" },
     { name = "pytest-mock", marker = "extra == 'test'", specifier = "==3.14.0" },
     { name = "sphinx", marker = "extra == 'docs'", specifier = ">=8.1.3" },

@@ -18,9 +18,3 @@ htmlcov
 
 # output working directory
 work/
-
-# credentials file
-credentials.json
-
-# sphinx build directory
-_build/

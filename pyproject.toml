@@ -42,22 +42,18 @@ build-backend = "hatchling.build"
 [tool.setuptools]
 include-package-data = false
 
-[tool.setuptools.packages.find]
-exclude = ["**/*_test.py"]
-
 [project.scripts]
 pis = "pis.core:main"
 
 [tool.pytest.ini_options]
-testpaths = ["test/pis"]
+testpaths = ["src/test"]
 filterwarnings = "ignore:.*google._upb*" # warning from google protobuf library
 
 [tool.coverage.report]
 exclude_lines = ["pragma: no cover", "if TYPE_CHECKING:"]
 
 [tool.deptry]
-extend_exclude = ["[0-9a-zA-Z_/]+_test.py"]
-pep621_dev_dependency_groups = ["dev", "test", "docs"]
+pep621_dev_dependency_groups = ["test", "docs"]
 
 [tool.ruff]
 target-version = 'py313'

@@ -436,9 +436,12 @@ steps:
     - name: copy l2g model
       source: gs://ot_orchestration/benchmarks/l2g/fm0/v5.1_best_cv/locus_to_gene_model/classifier.skops
       destination: etc/model/l2g_prediction/classifier.skops
-    - name: copy l2g gold_standard
-      source: gs://genetics-portal-dev-analysis/xg1/L2G_intervals/training_set_v5_1_efo_no_explosion.json
-      destination: input/l2g/gold_standard.json
+    - name: explode_glob l2g gold_standard
+      glob: gs://genetics-portal-dev-analysis/xg1/L2G_intervals/training_set_v5_1_efo_no_explosion.json/*.json
+      do:
+        - name: copy l2g gold_standard ${match_stem}
+          source: ${match_prefix}/${match_path}${match_stem}.${match_ext}
+          destination: input/l2g/gold_standard/${uuid}.json
   ##################################################################################################
 
   #: LITERATURE STEP :##############################################################################

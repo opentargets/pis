@@ -1,6 +1,6 @@
 [project]
 name = "PIS"
-version = "25.2.0-alpha.5"
+version = "25.2.0-alpha.6"
 description = "Open Targets Pipeline Input Stage"
 readme = "README.md"
 requires-python = ">=3.13"
@@ -10,7 +10,7 @@ dependencies = [
   "elasticsearch==7.17.12",       # must be ^7.0.0 to be compatible with chembl es server
   "jq==1.8.0",
   "loguru==0.7.3",
-  "opentargets-otter>=25.0.0a11",
+  "opentargets-otter>=25.0.0a13",
 ]
 
 [tool.uv]

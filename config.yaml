@@ -1,13 +1,15 @@
 ---
 work_path: ./work
 log_level: DEBUG
-# release_uri: gs://open-targets-pre-data-releases/uo_test_otter
+release_uri: gs://open-targets-pre-data-releases/uo_test_otter
 pool: 8
 
 scratchpad:
   chembl_version: '35'
-  efo_version: '3.74.0'
+  efo_version: '3.73.0'
   ensembl_version: '113'
+  hpo_version: '2025-01-16'
+  mondo_version: '2025-02-04'
 
 steps:
   #: BIOSAMPLE STEP :###############################################################################
@@ -32,15 +34,17 @@ steps:
       destination: input/disease/efo_otar_slim.json
 
     - name: copy hpo
-      source: https://raw.githubusercontent.com/obophenotype/human-phenotype-ontology/v2021-10-10/hp.json
-      destination: input/disease/hp.json
+      # we were using v2021-10-10 release until 25.03
+      source: https://github.com/obophenotype/human-phenotype-ontology/releases/download/v${hpo_version}/hp-full.json
+      destination: input/disease/hp-full.json
 
     - name: copy hpo phenotypes
       source: http://purl.obolibrary.org/obo/hp/hpoa/phenotype.hpoa
       destination: input/disease/phenotype.hpoa
 
     - name: copy mondo
-      source: https://github.com/monarch-initiative/mondo/releases/download/v2021-12-30/mondo.json
+      # we were using v2021-12-30 release until 25.03
+      source: https://github.com/monarch-initiative/mondo/releases/download/v${mondo_version}/mondo.json
       destination: input/disease/mondo.json
   ##################################################################################################
 
@@ -427,11 +431,14 @@ steps:
       destination: input/interaction/string-interactions.txt.gz
   ##################################################################################################
 
-  #: L2G_PREDICTION STEP :##########################################################################
-  l2g_prediction:
+  #: L2G STEP :#####################################################################################
+  l2g:
     - name: copy l2g model
       source: gs://ot_orchestration/benchmarks/l2g/fm0/v5.1_best_cv/locus_to_gene_model/classifier.skops
       destination: etc/model/l2g_prediction/classifier.skops
+    - name: copy l2g gold_standard
+      source: gs://genetics-portal-dev-analysis/xg1/L2G_intervals/training_set_v5_1_efo_no_explosion.json
+      destination: input/l2g/gold_standard.json
   ##################################################################################################
 
   #: LITERATURE STEP :##############################################################################

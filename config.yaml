@@ -437,11 +437,11 @@ steps:
       source: gs://ot_orchestration/benchmarks/l2g/fm0/v5.1_best_cv/locus_to_gene_model/classifier.skops
       destination: etc/model/l2g_prediction/classifier.skops
     - name: explode_glob l2g gold_standard
-      glob: gs://genetics-portal-dev-analysis/xg1/L2G_intervals/training_set_v5_1_efo_no_explosion.json/*.json
+      glob: gs://genetics-portal-dev-analysis/yt4/20241024_EGL_playground/training_set/patched_training_2503-testrun-1_all_string_extended_EGL_variants.json/*.json
       do:
         - name: copy l2g gold_standard ${match_stem}
           source: ${match_prefix}/${match_path}${match_stem}.${match_ext}
-          destination: input/l2g/gold_standard/${uuid}.json
+          destination: input/l2g/gold_standard.json/${uuid}.json
   ##################################################################################################
 
   #: LITERATURE STEP :##############################################################################

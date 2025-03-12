@@ -24,5 +24,6 @@
     "https://raw.githubusercontent.com/opentargets/otter/refs/heads/main/.vscode/config-schema.json": [
       "config.yaml"
     ]
-  }
+  },
+  "yaml.format.singleQuote": true,
 }

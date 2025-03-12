@@ -5,11 +5,11 @@ release_uri: gs://open-targets-pre-data-releases/uo_test_otter
 pool: 8
 
 scratchpad:
-  chembl_version: "35"
-  efo_version: "3.73.0"
-  ensembl_version: "113"
-  hpo_version: "2025-01-16"
-  mondo_version: "2025-02-04"
+  chembl_version: '35'
+  efo_version: '3.73.0'
+  ensembl_version: '113'
+  hpo_version: '2025-01-16'
+  mondo_version: '2025-02-04'
 
 steps:
   #: BIOSAMPLE STEP :###############################################################################
@@ -144,7 +144,7 @@ steps:
   evidence:
     - name: find_latest atlas
       source: gs://otar010-atlas
-      scratchpad_key: "latest_atlas"
+      scratchpad_key: 'latest_atlas'
     - name: copy atlas
       requires:
         - find_latest atlas
@@ -153,7 +153,7 @@ steps:
 
     - name: find_latest cancer biomarkers
       source: gs://otar000-evidence_input/CancerBiomarkers/json
-      scratchpad_key: "latest_cancer_biomarkers"
+      scratchpad_key: 'latest_cancer_biomarkers'
     - name: copy cancer biomarkers
       requires:
         - find_latest cancer biomarkers
@@ -162,7 +162,7 @@ steps:
 
     - name: find_latest chembl
       source: gs://otar000-evidence_input/ChEMBL/json
-      scratchpad_key: "latest_chembl"
+      scratchpad_key: 'latest_chembl'
     - name: copy chembl
       requires:
         - find_latest chembl
@@ -171,7 +171,7 @@ steps:
 
     - name: find_latest clingen
       source: gs://otar000-evidence_input/ClinGen/json
-      scratchpad_key: "latest_clingen"
+      scratchpad_key: 'latest_clingen'
     - name: copy clingen
       requires:
         - find_latest clingen
@@ -180,8 +180,8 @@ steps:
 
     - name: find_latest cosmic
       source: gs://otar007-cosmic
-      pattern: "!hallmarks"
-      scratchpad_key: "latest_cosmic"
+      pattern: '!hallmarks'
+      scratchpad_key: 'latest_cosmic'
     - name: copy cosmic
       requires:
         - find_latest cosmic
@@ -190,7 +190,7 @@ steps:
 
     - name: find_latest crispr
       source: gs://otar000-evidence_input/CRISPR/json
-      scratchpad_key: "latest_crispr"
+      scratchpad_key: 'latest_crispr'
     - name: copy crispr
       requires:
         - find_latest crispr
@@ -199,7 +199,7 @@ steps:
 
     - name: find_latest crispr_screen
       source: gs://otar000-evidence_input/Crispr_screens/json
-      scratchpad_key: "latest_crispr_screen"
+      scratchpad_key: 'latest_crispr_screen'
     - name: copy crispr_screen
       requires:
         - find_latest crispr_screen
@@ -208,7 +208,7 @@ steps:
 
     - name: find_latest eva
       source: gs://otar012-eva/disease-target-evidence
-      scratchpad_key: "latest_eva"
+      scratchpad_key: 'latest_eva'
     - name: copy eva
       requires:
         - find_latest eva
@@ -217,7 +217,7 @@ steps:
 
     - name: find_latest gene_burden
       source: gs://otar000-evidence_input/GeneBurden/json
-      scratchpad_key: "latest_gene_burden"
+      scratchpad_key: 'latest_gene_burden'
     - name: copy gene_burden
       requires:
         - find_latest gene_burden
@@ -226,7 +226,7 @@ steps:
 
     - name: find_latest gene2phenotype
       source: gs://otar000-evidence_input/Gene2Phenotype/json
-      scratchpad_key: "latest_gene2phenotype"
+      scratchpad_key: 'latest_gene2phenotype'
     - name: copy gene2phenotype
       requires:
         - find_latest gene2phenotype
@@ -235,7 +235,7 @@ steps:
 
     - name: find_latest genomics_england
       source: gs://otar000-evidence_input/GenomicsEngland/json
-      scratchpad_key: "latest_genomics_england"
+      scratchpad_key: 'latest_genomics_england'
     - name: copy genomics_england
       requires:
         - find_latest genomics_england
@@ -244,7 +244,7 @@ steps:
 
     - name: find_latest impc
       source: gs://otar000-evidence_input/IMPC/json
-      scratchpad_key: "latest_impc"
+      scratchpad_key: 'latest_impc'
     - name: copy impc
       requires:
         - find_latest impc
@@ -253,7 +253,7 @@ steps:
 
     - name: find_latest intogen
       source: gs://otar000-evidence_input/IntOgen/json
-      scratchpad_key: "latest_intogen"
+      scratchpad_key: 'latest_intogen'
     - name: copy intogen
       requires:
         - find_latest intogen
@@ -262,7 +262,7 @@ steps:
 
     - name: find_latest orphanet
       source: gs://otar000-evidence_input/Orphanet/json
-      scratchpad_key: "latest_orphanet"
+      scratchpad_key: 'latest_orphanet'
     - name: copy orphanet
       requires:
         - find_latest orphanet
@@ -271,7 +271,7 @@ steps:
 
     - name: find_latest progeny
       source: gs://otar000-evidence_input/PROGENy/json
-      scratchpad_key: "latest_progeny"
+      scratchpad_key: 'latest_progeny'
     - name: copy progeny
       requires:
         - find_latest progeny
@@ -280,7 +280,7 @@ steps:
 
     - name: find_latest reactome
       source: gs://otar006-reactome
-      scratchpad_key: "latest_reactome"
+      scratchpad_key: 'latest_reactome'
     - name: copy reactome
       requires:
         - find_latest reactome
@@ -289,7 +289,7 @@ steps:
 
     - name: find_latest slapenrich
       source: gs://otar000-evidence_input/SLAPEnrich/json
-      scratchpad_key: "latest_slapenrich"
+      scratchpad_key: 'latest_slapenrich'
     - name: copy slapenrich
       requires:
         - find_latest slapenrich
@@ -298,7 +298,7 @@ steps:
 
     - name: find_latest sysbio
       source: gs://otar000-evidence_input/SysBio/json
-      scratchpad_key: "latest_sysbio"
+      scratchpad_key: 'latest_sysbio'
     - name: copy sysbio
       requires:
         - find_latest sysbio
@@ -307,7 +307,7 @@ steps:
 
     - name: find_latest uniprot literature
       source: gs://otar000-evidence_input/Uniprot_literature/json
-      scratchpad_key: "latest_uniprot_literature"
+      scratchpad_key: 'latest_uniprot_literature'
     - name: copy uniprot_literature
       requires:
         - find_latest uniprot literature
@@ -316,7 +316,7 @@ steps:
 
     - name: find_latest uniprot_variants
       source: gs://otar000-evidence_input/Uniprot_variants/json
-      scratchpad_key: "latest_uniprot_variants"
+      scratchpad_key: 'latest_uniprot_variants'
     - name: copy uniprot_variants
       requires:
         - find_latest uniprot_variants
@@ -337,7 +337,7 @@ steps:
 
     - name: find_latest encore
       source: gs://otar013-ppp/encore
-      scratchpad_key: "latest_encore"
+      scratchpad_key: 'latest_encore'
     - name: copy encore
       requires:
         - find_latest encore
@@ -346,7 +346,7 @@ steps:
 
     - name: find_latest ot_crispr
       source: gs://otar013-ppp/ot_crispr
-      scratchpad_key: "latest_ot_crispr"
+      scratchpad_key: 'latest_ot_crispr'
     - name: copy ot_crispr
       requires:
         - find_latest ot_crispr
@@ -466,8 +466,8 @@ steps:
       requires:
         - copy openfda archive manifest
       json_path: input/openfda/fda_events.json
-      jq_filter: ".results.drug.event.partitions[].file"
-      prefix: "https://download.open.fda.gov/drug/event/"
+      jq_filter: '.results.drug.event.partitions[].file'
+      prefix: 'https://download.open.fda.gov/drug/event/'
       do:
         - name: copy fda event ${each}
           source: ${prefix}${each}
@@ -580,8 +580,8 @@ steps:
 
     - name: find_latest cosmic hallmark
       source: gs://otar007-cosmic
-      pattern: "hallmarks"
-      scratchpad_key: "latest_cosmic_hallmark"
+      pattern: 'hallmarks'
+      scratchpad_key: 'latest_cosmic_hallmark'
     - name: copy cosmic
       requires:
         - find_latest cosmic hallmark

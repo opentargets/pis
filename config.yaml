@@ -451,6 +451,18 @@ steps:
       destination: input/literature/PMID_PMCID_DOI.csv.gz
   ##################################################################################################
 
+  #: MOUSE_PHENOTYPE STEP :#######################################################################
+  mouse_phenotype:
+    - name: find_latest mouse phenotypes
+      source: gs://otar001-core/MousePhenotypes
+      scratchpad_key: latest_mouse_phenotypes
+    - name: copy mouse phenotypes
+      requires:
+        - find_latest mouse phenotypes
+      source: ${latest_mouse_phenotypes}
+      destination: input/mouse_phenotype/mouse_phenotypes.json.gz
+  ##################################################################################################
+
   #: OPENFDA STEP :#################################################################################
   # in case we want to test with only a few files, we can use the jq_filter:
   # '.results.drug.event.partitions[0:10] | map(.file)[]'
@@ -697,16 +709,4 @@ steps:
     - name: copy mouse phenotype scores
       source: https://raw.githubusercontent.com/opentargets/target_engine/main/src/data_flow/phenotypeScores/20230825_mousePheScores.csv
       destination: input/target_engine/mouse_pheno_scores.csv
-  ##################################################################################################
-
-  #: TARGET_VALIDATION STEP :#######################################################################
-  target_validation:
-    - name: find_latest mouse phenotypes
-      source: gs://otar001-core/MousePhenotypes
-      scratchpad_key: latest_mouse_phenotypes
-    - name: copy mouse phenotypes
-      requires:
-        - find_latest mouse phenotypes
-      source: ${latest_mouse_phenotypes}
-      destination: input/target_validation/mouse_phenotypes.json.gz
   ##################################################################################################

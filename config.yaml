@@ -225,14 +225,27 @@ steps:
       source: ${latest_gene_burden}
       destination: input/evidence/gene_burden.json.gz
 
-    - name: find_latest gene2phenotype
-      source: gs://otar000-evidence_input/Gene2Phenotype/json
-      scratchpad_key: 'latest_gene2phenotype'
-    - name: copy gene2phenotype
-      requires:
-        - find_latest gene2phenotype
-      source: ${latest_gene2phenotype}
-      destination: input/evidence/gene2phenotype.json.gz
+    - name: copy gene2phenotype cancer
+      source: https://www.ebi.ac.uk/gene2phenotype/api/panel/Cancer/download/
+      destination: input/evidence/gene2phenotype/cancer.csv
+    - name: copy gene2phenotype cardiac
+      source: https://www.ebi.ac.uk/gene2phenotype/api/panel/Cardiac/download/
+      destination: input/evidence/gene2phenotype/cardiac.csv
+    - name: copy gene2phenotype dd
+      source: https://www.ebi.ac.uk/gene2phenotype/api/panel/DD/download/
+      destination: input/evidence/gene2phenotype/dd.csv
+    - name: copy gene2phenotype ear
+      source: https://www.ebi.ac.uk/gene2phenotype/api/panel/Ear/download/
+      destination: input/evidence/gene2phenotype/ear.csv
+    - name: copy gene2phenotype eye
+      source: https://www.ebi.ac.uk/gene2phenotype/api/panel/Eye/download/
+      destination: input/evidence/gene2phenotype/eye.csv
+    - name: copy gene2phenotype skeletal
+      source: https://www.ebi.ac.uk/gene2phenotype/api/panel/Skeletal/download/
+      destination: input/evidence/gene2phenotype/skeletal.csv
+    - name: copy gene2phenotype skin
+      source: https://www.ebi.ac.uk/gene2phenotype/api/panel/Skin/download/
+      destination: input/evidence/gene2phenotype/skin.csv
 
     - name: find_latest genomics_england
       source: gs://otar000-evidence_input/GenomicsEngland/json

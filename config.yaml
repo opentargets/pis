@@ -11,6 +11,7 @@ scratchpad:
   hpo_version: '2025-01-16'
   mondo_version: '2025-02-04'
   ot_curation: '25.03'
+  probes_drugs_version: '01_2025'
 
 steps:
   #: BIOSAMPLE STEP :###############################################################################
@@ -51,14 +52,9 @@ steps:
 
   #: DRUG STEP :####################################################################################
   drug:
-    - name: find_latest chemical probes
-      source: gs://otar001-core/ChemicalProbes/annotation
-      scratchpad_key: latest_chemical_probes
     - name: copy chemical probes
-      requires:
-        - find_latest chemical probes
-      source: ${latest_chemical_probes}
-      destination: input/drug/chemicalprobes.json.gz
+      source: https://www.probes-drugs.org/media/download/probes/pd_export_${probes_drugs_version}_probes_standardized.xlsx
+      destination: input/target/chemicalprobes/probes.xlsx
 
     - name: find_latest drugbank annotation
       source: gs://otar001-core/DrugBank/annotation
@@ -595,14 +591,13 @@ steps:
         - target_type
         - pref_name
 
-    - name: find_latest chemical probe
-      source: gs://otar001-core/ChemicalProbes/annotation
-      scratchpad_key: latest_chemical_probe
     - name: copy chemical probes
-      requires:
-        - find_latest chemical probe
-      source: ${latest_chemical_probe}
-      destination: input/target/chemicalprobes/chemicalprobes.json.gz
+      source: https://www.probes-drugs.org/media/download/probes/pd_export_${probes_drugs_version}_probes_standardized.xlsx
+      destination: input/target/chemicalprobes/probes.xlsx
+
+    - name: copy chemical probes links
+      source: https://www.probes-drugs.org/media/download/id_mapping/pd_export_${probes_drugs_version}_links_standardized.csv
+      destination: input/target/chemicalprobes/probes_links.csv
 
     - name: copy ensembl
       source: https://ftp.ensembl.org/pub/release-${ensembl_version}/json/homo_sapiens/homo_sapiens.json
@@ -748,7 +743,6 @@ steps:
     - name: copy uniprot-ssl
       source: https://rest.uniprot.org/locations/stream?compressed=true&fields=id%2Cname%2Ccategory&format=tsv&query=%28%2A%29
       destination: input/target/uniprot/uniprot-ssl.tsv.gz
-
   ##################################################################################################
 
   #: TARGET_ENGINE STEP :###########################################################################

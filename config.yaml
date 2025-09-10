@@ -154,14 +154,15 @@ steps:
       source: ${latest_atlas}
       destination: input/evidence/atlas.json.bz2
 
-    - name: find_latest cancer biomarkers
-      source: gs://otar000-evidence_input/CancerBiomarkers/json
-      scratchpad_key: 'latest_cancer_biomarkers'
-    - name: copy cancer biomarkers
-      requires:
-        - find_latest cancer biomarkers
-      source: ${latest_cancer_biomarkers}
-      destination: input/evidence/cancerbiomarkers.json.gz
+    - name: copy cancer biomarkers associations
+      source: gs://otar000-evidence_input/CancerBiomarkers/data_files/cancerbiomarkers-2018-05-01.tsv
+      destination: input/evidence/cancerbiomarkers/associations.tsv
+    - name: copy cancer biomarkers sources
+      source: gs://otar000-evidence_input/CancerBiomarkers/data_files/cancer_biomarker_source.jsonl
+      destination: input/evidence/cancerbiomarkers/sources.jsonl
+    - name: copy cancer biomarkers diseases
+      source: gs://otar000-evidence_input/CancerBiomarkers/data_files/cancer_biomarker_disease.jsonl
+      destination: input/evidence/cancerbiomarkers/diseases.jsonl
 
     - name: find_latest chembl
       source: gs://otar000-evidence_input/ChEMBL/json

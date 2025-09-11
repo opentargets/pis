@@ -139,7 +139,7 @@ steps:
   evidence:
     - name: explode ot_curation files
       foreach:
-        - mappings/disease/brain_crispr_studies.tsv
+        - mappings/biosystem/depmap_uberon_mapping.csv
       do:
         - name: copy ${each}
           source: https://raw.githubusercontent.com/opentargets/curation/${ot_curation}/${each}
@@ -192,14 +192,16 @@ steps:
       source: ${latest_cosmic}
       destination: input/evidence/cosmic.json.gz
 
-    - name: find_latest crispr
-      source: gs://otar000-evidence_input/CRISPR/json
-      scratchpad_key: 'latest_crispr'
-    - name: copy crispr
-      requires:
-        - find_latest crispr
-      source: ${latest_crispr}
-      destination: input/evidence/crispr.json.gz
+    - name: copy sanger cell passport
+      source: https://cog.sanger.ac.uk/cmp/download/model_list_latest.csv.gz
+      destination: input/evidence/cell_passport.csv.gz
+
+    - name: copy project_score cell types
+      source: gs://otar000-evidence_input/CRISPR/data_files/project_score_v2/cell_types.tsv
+      destination: input/evidence/project_score/cell_types.tsv
+    - name: copy project_score gene scores
+      source: gs://otar000-evidence_input/CRISPR/data_files/project_score_v2/mapped_diseases.tsv
+      destination: input/evidence/project_score/mapped_diseases.tsv
 
     - name: crispr_brain fetch
       destination: input/evidence/crispr_screens

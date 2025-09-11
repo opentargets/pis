@@ -12,6 +12,7 @@ scratchpad:
   mondo_version: '2025-02-04'
   ot_curation: '25.03'
   probes_drugs_version: '01_2025'
+  depmap_version: '2025Q2'
 
 steps:
   #: BIOSAMPLE STEP :###############################################################################
@@ -623,14 +624,12 @@ steps:
       source: https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_40/gencode.v40.annotation.gff3.gz
       destination: input/target/gencode/gencode.gff3.gz
 
-    - name: find_latest gene essentiality
-      source: gs://otar000-evidence_input/Essentiality/json
-      scratchpad_key: latest_gene_essentiality
-    - name: copy essentiality
-      requires:
-        - find_latest gene essentiality
-      source: ${latest_gene_essentiality}
-      destination: input/target/gene-essentiality/essentiality.json.gz
+    - name: explode_glob download essentiality files
+      glob: 'gs://otar000-evidence_input/Essentiality/DepMap/${depmap_version}/*.csv'
+      do:
+        - name: copy depmap ${match_stem}
+          source: ${uri}
+          destination: input/target/gene-essentiality/depmap/${match_stem}.${match_ext}
 
     - name: copy gene name
       source: https://storage.googleapis.com/public-download-files/hgnc/json/json/hgnc_complete_set.json

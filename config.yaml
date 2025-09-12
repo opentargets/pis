@@ -10,7 +10,7 @@ scratchpad:
   ensembl_version: '113'
   hpo_version: '2025-01-16'
   mondo_version: '2025-02-04'
-  ot_curation: '25.03'
+  ot_curation: '25.09'
   probes_drugs_version: '01_2025'
   depmap_version: '2025Q2'
 
@@ -220,14 +220,43 @@ steps:
       source: ${latest_eva}
       destination: input/evidence/eva.json.gz
 
-    - name: find_latest gene_burden
-      source: gs://otar000-evidence_input/GeneBurden/json
-      scratchpad_key: 'latest_gene_burden'
-    - name: copy gene_burden
-      requires:
-        - find_latest gene_burden
-      source: ${latest_gene_burden}
-      destination: input/evidence/gene_burden.json.gz
+    - name: copy gene_burden cvdi
+      source: https://static-content.springer.com/esm/art%3A10.1038%2Fs41588-024-01894-5/MediaObjects/41588_2024_1894_MOESM4_ESM.xlsx
+      destination: input/evidence/gene_burden/cvdi.xlsx
+    - name: explode_glob download genebass
+      glob: 'gs://otar000-evidence_input/GeneBurden/data_files/genebass_entries/*.parquet'
+      do:
+        - name: copy genebass ${match_stem}
+          source: ${uri}
+          destination: input/evidence/gene_burden/genebass/${match_stem}.${match_ext}
+
+    - name: copy gene_burden finngen
+      source: gs://finngen-public-data-r12/lof/data/finngen_R12_lof.txt.gz
+      destination: input/evidence/gene_burden/finngen/finngen.txt.gz
+    - name: copy gene_burden finngen phenos
+      source: https://r12.finngen.fi/api/phenos
+      destination: input/evidence/gene_burden/finngen/phenos
+
+    - name: explode_glob AZ parquet (binary)
+      glob: gs://otar000-evidence_input/GeneBurden/data_files/azphewas-com-470k-phewas-binary/*.parquet
+      do:
+        - name: copy binary ${match_stem}.parquet
+          source: ${uri}
+          destination: input/evidence/gene_burden/astrazeneca/azphewas-com-470k-phewas-binary/${match_stem}.parquet
+    - name: explode_glob AZ parquet (quantitative)
+      glob: gs://otar000-evidence_input/GeneBurden/data_files/azphewas-com-470k-phewas-quantitative/*.parquet
+      do:
+        - name: copy quantitative ${match_stem}.parquet
+          source: ${uri}
+          destination: input/evidence/gene_burden/astrazeneca/azphewas-com-470k-phewas-quantitative/${match_stem}.parquet
+    - name: explode AZ CSVs
+      foreach:
+        - azphewas_com_genes_UK_Biobank_470k.csv
+        - azphewas_com_phenotypes_UK_Biobank_470k.csv
+      do:
+        - name: copy ${each}
+          source: gs://otar000-evidence_input/GeneBurden/data_files/${each}
+          destination: input/evidence/gene_burden/astrazeneca/${each}
 
     - name: copy gene2phenotype cancer
       source: https://www.ebi.ac.uk/gene2phenotype/api/panel/Cancer/download/

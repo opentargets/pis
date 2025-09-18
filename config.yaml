@@ -166,13 +166,21 @@ steps:
       destination: input/evidence/cancerbiomarkers/diseases.jsonl
 
     - name: find_latest chembl
-      source: gs://otar000-evidence_input/ChEMBL/json
+      source: gs://otar008-chembl
       scratchpad_key: 'latest_chembl'
     - name: copy chembl
       requires:
         - find_latest chembl
       source: ${latest_chembl}
-      destination: input/evidence/chembl.json.gz
+      destination: input/evidence/chembl/chembl.json.gz
+    - name: find_latest stop_reasons
+      source: gs://otar000-evidence_input/ChEMBL/data_files
+      scratchpad_key: 'latest_chembl_stop_reasons'
+    - name: copy chembl stop reasons
+      requires:
+        - find_latest stop_reasons
+      source: ${latest_chembl_stop_reasons}
+      destination: input/evidence/chembl/stop_reasons.json
 
     - name: find_latest clingen
       source: gs://otar000-evidence_input/ClinGen/json

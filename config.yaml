@@ -182,14 +182,9 @@ steps:
       source: ${latest_chembl_stop_reasons}
       destination: input/evidence/chembl/stop_reasons.json
 
-    - name: find_latest clingen
-      source: gs://otar000-evidence_input/ClinGen/json
-      scratchpad_key: 'latest_clingen'
     - name: copy clingen
-      requires:
-        - find_latest clingen
-      source: ${latest_clingen}
-      destination: input/evidence/clingen.json.gz
+      source: https://search.clinicalgenome.org/kb/gene-validity/download
+      destination: input/evidence/clingen.csv
 
     - name: find_latest cosmic
       source: gs://otar007-cosmic

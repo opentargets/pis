@@ -248,14 +248,22 @@ steps:
       source: ${latest_genomics_england}
       destination: input/evidence/genomics_england.json.gz
 
-    - name: find_latest impc
-      source: gs://otar000-evidence_input/IMPC/json
-      scratchpad_key: 'latest_impc'
-    - name: copy impc
-      requires:
-        - find_latest impc
-      source: ${latest_impc}
-      destination: input/evidence/impc.json.gz
+    - name: impc_solr fetch
+      destination: input/evidence/impc
+      solr_host: http://www.ebi.ac.uk/mi/impc/solr/phenodigm/select
+      timeout: 3600
+    - name: explode impc metadata
+      foreach:
+        - MGI_Gene_Model_Coord.rpt  # Mouse gene mappings
+        - MGI_PhenoGenoMP.rpt  # Mouse PubMed references
+        - mp.owl  # Mammalian Phenotype ontology
+      do:
+        - name: copy ${each}
+          source: http://www.informatics.jax.org/downloads/reports/${each}
+          destination: input/evidence/impc/${each}
+    - name: copy gene name
+      source: https://storage.googleapis.com/public-download-files/hgnc/json/json/hgnc_complete_set.txt
+      destination: input/target/genenames/hgnc_complete_set.txt
 
     - name: find_latest intogen
       source: gs://otar000-evidence_input/IntOgen/json
@@ -455,18 +463,6 @@ steps:
     - name: copy literature
       source: https://ftp.ebi.ac.uk/pub/databases/pmc/DOI/PMID_PMCID_DOI.csv.gz
       destination: input/literature/PMID_PMCID_DOI.csv.gz
-  ##################################################################################################
-
-  #: MOUSE_PHENOTYPE STEP :#######################################################################
-  mouse_phenotype:
-    - name: find_latest mouse phenotypes
-      source: gs://otar001-core/MousePhenotypes
-      scratchpad_key: latest_mouse_phenotypes
-    - name: copy mouse phenotypes
-      requires:
-        - find_latest mouse phenotypes
-      source: ${latest_mouse_phenotypes}
-      destination: input/mouse_phenotype/mouse_phenotypes.json.gz
   ##################################################################################################
 
   #: OPENFDA STEP :#################################################################################

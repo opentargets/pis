@@ -1,6 +1,6 @@
 [project]
 name = "PIS"
-version = "25.2.2"
+version = "25.2.3.dev.2"
 description = "Open Targets Pipeline Input Stage"
 readme = "README.md"
 requires-python = ">=3.13"
@@ -12,6 +12,7 @@ dependencies = [
   "loguru==0.7.3",
   "opentargets-otter>=25.0.2",
   "requests>=2.32.4",
+  "retry>=0.9.2",
 ]
 
 [tool.uv]

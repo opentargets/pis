@@ -664,8 +664,8 @@ steps:
           destination: input/target/gene-essentiality/depmap/${match_stem}.${match_ext}
 
     - name: copy gene name
-      source: https://storage.googleapis.com/public-download-files/hgnc/json/json/hgnc_complete_set.json
-      destination: input/target/genenames/hgnc_complete_set.json
+      source: https://storage.googleapis.com/public-download-files/hgnc/json/json/hgnc_complete_set.txt
+      destination: input/target/genenames/hgnc_complete_set.txt
 
     - name: copy gnomad
       source: https://storage.googleapis.com/gcp-public-data--gnomad/release/2.1.1/constraint/gnomad.v2.1.1.lof_metrics.by_gene.txt.bgz

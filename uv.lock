@@ -530,7 +530,7 @@ wheels = [
 
 [[package]]
 name = "pis"
-version = "25.2.3.dev10"
+version = "25.2.3.dev11"
 source = { editable = "." }
 dependencies = [
     { name = "elasticsearch" },

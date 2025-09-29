@@ -233,14 +233,9 @@ steps:
       source: ${latest_gene2phenotype}
       destination: input/evidence/gene2phenotype.json.gz
 
-    - name: find_latest genomics_england
-      source: gs://otar000-evidence_input/GenomicsEngland/json
-      scratchpad_key: 'latest_genomics_england'
-    - name: copy genomics_england
-      requires:
-        - find_latest genomics_england
-      source: ${latest_genomics_england}
-      destination: input/evidence/genomics_england.json.gz
+    - name: copy panel_app
+      source: gs://otar000-evidence_input/GenomicsEngland/data_files/All_genes_20250525_public_v1plus_genes_all_ratings.tsv
+      destination: input/evidence/panel_app.tsv
 
     - name: find_latest impc
       source: gs://otar000-evidence_input/IMPC/json

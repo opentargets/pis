@@ -283,14 +283,9 @@ steps:
       source: https://www.ebi.ac.uk/gene2phenotype/api/panel/Skin/download/
       destination: input/evidence/gene2phenotype/skin.csv
 
-    - name: find_latest genomics_england
-      source: gs://otar000-evidence_input/GenomicsEngland/json
-      scratchpad_key: 'latest_genomics_england'
-    - name: copy genomics_england
-      requires:
-        - find_latest genomics_england
-      source: ${latest_genomics_england}
-      destination: input/evidence/genomics_england.json.gz
+    - name: copy panel_app
+      source: gs://otar000-evidence_input/GenomicsEngland/data_files/All_genes_20250525_public_v1plus_genes_all_ratings.tsv
+      destination: input/evidence/panel_app.tsv
 
     - name: solr fetch gene_gene
       destination: input/evidence/impc

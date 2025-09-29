@@ -372,14 +372,9 @@ steps:
       source: ${latest_intogen}
       destination: input/evidence/intogen.json.gz
 
-    - name: find_latest orphanet
-      source: gs://otar000-evidence_input/Orphanet/json
-      scratchpad_key: 'latest_orphanet'
     - name: copy orphanet
-      requires:
-        - find_latest orphanet
-      source: ${latest_orphanet}
-      destination: input/evidence/orphanet.json.gz
+      source: http://www.orphadata.org/data/xml/en_product6.xml
+      destination: input/evidence/orphanet.xml
 
     - name: find_latest progeny
       source: gs://otar000-evidence_input/PROGENy/json

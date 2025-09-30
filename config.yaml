@@ -54,6 +54,7 @@ steps:
     - name: copy chemical probes
       source: https://www.probes-drugs.org/media/download/probes/pd_export_${probes_drugs_version}_probes_standardized.xlsx
       destination: input/target/chemicalprobes/probes.xlsx
+
     - name: find_latest drugbank annotation
       source: gs://otar001-core/DrugBank/annotation
       scratchpad_key: latest_drugbank_annotation
@@ -687,7 +688,6 @@ steps:
     - name: copy uniprot-ssl
       source: https://rest.uniprot.org/locations/stream?compressed=true&fields=id%2Cname%2Ccategory&format=tsv&query=%28%2A%29
       destination: input/target/uniprot/uniprot-ssl.tsv.gz
-
   ##################################################################################################
 
   #: TARGET_ENGINE STEP :###########################################################################

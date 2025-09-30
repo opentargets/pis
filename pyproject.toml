@@ -10,7 +10,7 @@ dependencies = [
   "elasticsearch==7.17.12",    # must be ^7.0.0 to be compatible with chembl es server
   "jq==1.8.0",
   "loguru==0.7.3",
-  "opentargets-otter>=25.0.2",
+  "opentargets-otter>=25.0.6",
 ]
 
 [tool.uv]

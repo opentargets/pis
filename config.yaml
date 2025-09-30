@@ -8,11 +8,11 @@ scratchpad:
   chembl_version: '35'
   efo_version: '3.73.0'
   ensembl_version: '113'
+  depmap_version: '2025Q2'
   hpo_version: '2025-01-16'
   mondo_version: '2025-02-04'
   ot_curation: '25.09'
   probes_drugs_version: '01_2025'
-  depmap_version: '2025Q2'
 
 steps:
   #: BIOSAMPLE STEP :###############################################################################
@@ -587,16 +587,20 @@ steps:
       destination: input/otar/otar_project_to_efo.csv
   ##################################################################################################
 
-  #: PHARMACOGENOMICS STEP :########################################################################
-  pharmacogenomics:
-    - name: find_latest pharmacogenomics
-      source: gs://otar001-core/Pharmacogenetics/json
-      scratchpad_key: latest_pharmacogenomics
-    - name: copy pharmacogenomics
+  #: PHARMACOGENETICS STEP :########################################################################
+  pharmacogenetics:
+    - name: find_latest clinpgx annotation
+      source: gs://otar012-eva/pharmacogenomics/
+      scratchpad_key: latest_clinpgx_annotation
+    - name: copy clinpgx annotation
       requires:
-        - find_latest pharmacogenomics
-      source: ${latest_pharmacogenomics}
-      destination: input/pharmacogenomics/pharmacogenomics.json.gz
+        - find_latest clinpgx annotation
+      source: ${latest_clinpgx_annotation}
+      destination: input/pharmacogenetics/clinpgx_annotation.json.gz
+    - name: copy ot_curation extracted phenotypes
+      source: https://raw.githubusercontent.com/opentargets/curation/refs/tags/${ot_curation}/pharmacogenetics/pgx_phenotypes.json
+      destination: input/pharmacogenetics/phenotypes.json
+
   ##################################################################################################
 
   #: REACTOME STEP :################################################################################

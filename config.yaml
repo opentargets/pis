@@ -145,8 +145,6 @@ steps:
   evidence:
     - name: explode ot_curation files
       foreach:
-        - mappings/biosystem/depmap_uberon_mapping.csv
-        - gene_burden/curated_evidence.tsv
         - mappings/disease/brain_crispr_studies.tsv
       do:
         - name: copy ${each}
@@ -208,8 +206,7 @@ steps:
       destination: input/evidence/crispr.json.gz
 
     - name: crispr_brain fetch
-      destination_screens: input/evidence/crispr_screens/brain_screens.json.gz
-      destination_studies_dir: input/evidence/crispr_screens/brain_studies
+      destination: input/evidence/crispr_screens
       api_url: https://crisprbrain.org/api/screens
       client_id: 92f263647c43525d3e4f181aa7e348f26e32129c0f827321d9261cc9765c56c0
       study_prefix_url: https://storage.googleapis.com/crisprbrain.appspot.com/api-data/

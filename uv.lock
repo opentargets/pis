@@ -530,13 +530,14 @@ wheels = [
 
 [[package]]
 name = "pis"
-version = "25.2.8"
+version = "25.2.2"
 source = { editable = "." }
 dependencies = [
     { name = "elasticsearch" },
     { name = "jq" },
     { name = "loguru" },
     { name = "opentargets-otter" },
+    { name = "requests" },
 ]
 
 [package.optional-dependencies]
@@ -573,6 +574,7 @@ requires-dist = [
     { name = "opentargets-otter", specifier = ">=25.0.2" },
     { name = "pytest", marker = "extra == 'test'", specifier = "==8.3.4" },
     { name = "pytest-mock", marker = "extra == 'test'", specifier = "==3.14.0" },
+    { name = "requests", specifier = ">=2.32.4" },
     { name = "sphinx", marker = "extra == 'docs'", specifier = ">=8.1.3" },
     { name = "sphinx-autobuild", marker = "extra == 'docs'", specifier = ">=2024.10.3" },
     { name = "sphinx-issues", marker = "extra == 'docs'", specifier = ">=5.0.0" },

@@ -10,6 +10,7 @@ scratchpad:
   ensembl_version: '113'
   hpo_version: '2025-01-16'
   mondo_version: '2025-02-04'
+  ot_curation: '25.03'
 
 steps:
   #: BIOSAMPLE STEP :###############################################################################
@@ -142,6 +143,13 @@ steps:
 
   #: EVIDENCE STEP :################################################################################
   evidence:
+    - name: explode ot_curation files
+      foreach:
+        - mappings/disease/brain_crispr_studies.tsv
+      do:
+        - name: copy ${each}
+          source: https://raw.githubusercontent.com/opentargets/curation/${ot_curation}/${each}
+          destination: input/ot_curation/${each}
     - name: find_latest atlas
       source: gs://otar010-atlas
       scratchpad_key: 'latest_atlas'
@@ -197,14 +205,12 @@ steps:
       source: ${latest_crispr}
       destination: input/evidence/crispr.json.gz
 
-    - name: find_latest crispr_screen
-      source: gs://otar000-evidence_input/Crispr_screens/json
-      scratchpad_key: 'latest_crispr_screen'
-    - name: copy crispr_screen
-      requires:
-        - find_latest crispr_screen
-      source: ${latest_crispr_screen}
-      destination: input/evidence/crispr_screen.json.gz
+    - name: crispr_brain fetch
+      destination: input/evidence/crispr_screens
+      api_url: https://crisprbrain.org/api/screens
+      client_id: 92f263647c43525d3e4f181aa7e348f26e32129c0f827321d9261cc9765c56c0
+      study_prefix_url: https://storage.googleapis.com/crisprbrain.appspot.com/api-data/
+      validate_version: 1
 
     - name: find_latest eva
       source: gs://otar012-eva/disease-target-evidence

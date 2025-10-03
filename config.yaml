@@ -79,7 +79,6 @@ steps:
         - efo_id
         - max_phase_for_ind
         - indication_refs
-
     - name: elasticsearch chembl drug warning
       url: https://www.ebi.ac.uk/chembl/elk/es
       destination: input/drug/chembl_drug_warning.jsonl
@@ -98,7 +97,6 @@ steps:
         - warning_refs
         - warning_type
         - warning_year
-
     - name: elasticsearch chembl mechanism of action
       url: https://www.ebi.ac.uk/chembl/elk/es
       destination: input/drug/chembl_mechanism.jsonl
@@ -150,6 +148,7 @@ steps:
         - name: copy ${each}
           source: https://raw.githubusercontent.com/opentargets/curation/${ot_curation}/${each}
           destination: input/ot_curation/${each}
+
     - name: find_latest atlas
       source: gs://otar010-atlas
       scratchpad_key: 'latest_atlas'
@@ -248,19 +247,73 @@ steps:
       source: ${latest_genomics_england}
       destination: input/evidence/genomics_england.json.gz
 
-    - name: impc_solr fetch
+    - name: solr fetch gene_gene
       destination: input/evidence/impc
-      solr_host: http://www.ebi.ac.uk/mi/impc/solr/phenodigm/select
-      timeout: 3600
+      url: http://www.ebi.ac.uk/mi/impc/solr/phenodigm/select
+      queries:
+        - data_type: gene_gene
+          fields:
+            - gene_id
+            - hgnc_gene_id
+    - name: solr fetch ontology_ontology
+      destination: input/evidence/impc
+      url: http://www.ebi.ac.uk/mi/impc/solr/phenodigm/select
+      queries:
+        - data_type: ontology_ontology
+          fields:
+            - mp_id
+            - hp_id
+    - name: solr fetch mouse_model
+      destination: input/evidence/impc
+      url: http://www.ebi.ac.uk/mi/impc/solr/phenodigm/select
+      queries:
+        - data_type: mouse_model
+          fields:
+            - model_id
+            - model_phenotypes
+    - name: solr fetch disease
+      destination: input/evidence/impc
+      url: http://www.ebi.ac.uk/mi/impc/solr/phenodigm/select
+      queries:
+        - data_type: disease
+          fields:
+            - disease_id
+            - disease_phenotypes
+    - name: solr fetch disease_model_summary
+      destination: input/evidence/impc
+      url: http://www.ebi.ac.uk/mi/impc/solr/phenodigm/select
+      batch_size: 100000000
+      queries:
+        - data_type: disease_model_summary
+          fields:
+            - model_id
+            - model_genetic_background
+            - model_description
+            - disease_id
+            - disease_term
+            - disease_model_avg_norm
+            - disease_model_max_norm
+            - marker_id
+    - name: solr fetch ontology
+      destination: input/evidence/impc
+      url: http://www.ebi.ac.uk/mi/impc/solr/phenodigm/select
+      queries:
+        - data_type: ontology
+          fields:
+            - ontology
+            - phenotype_id
+            - phenotype_term
+
     - name: explode impc metadata
       foreach:
-        - MGI_Gene_Model_Coord.rpt  # Mouse gene mappings
-        - MGI_PhenoGenoMP.rpt  # Mouse PubMed references
-        - mp.owl  # Mammalian Phenotype ontology
+        - MGI_Gene_Model_Coord.rpt # Mouse gene mappings
+        - MGI_PhenoGenoMP.rpt # Mouse PubMed references
+        - mp.owl # Mammalian Phenotype ontology
       do:
         - name: copy ${each}
           source: http://www.informatics.jax.org/downloads/reports/${each}
           destination: input/evidence/impc/${each}
+
     - name: copy gene name
       source: https://storage.googleapis.com/public-download-files/hgnc/json/json/hgnc_complete_set.txt
       destination: input/target/genenames/hgnc_complete_set.txt

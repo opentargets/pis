@@ -59,8 +59,6 @@ class CrisprBrain(Task):
         self.studies_local_path = context.config.work_path / spec.destination / 'brain_studies'
 
         # Resolve remote destinations if release_uri is configured
-        self.screens_remote_uri = None
-        self.studies_remote_uri = None
         if context.config.release_uri:
             self.screens_remote_uri = f'{context.config.release_uri}/{spec.destination}/brain_screens.json.gz'
             self.studies_remote_uri = f'{context.config.release_uri}/{spec.destination}/brain_studies'

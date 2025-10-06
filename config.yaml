@@ -757,14 +757,31 @@ steps:
       source: https://reactome.org/download/current/Ensembl2Reactome.txt
       destination: input/target/reactome/Ensembl2Reactome.txt
 
-    - name: find_latest safety
-      source: gs://otar001-core/TargetSafety/json
-      scratchpad_key: latest_safety
-    - name: copy target safety
+    - name: explode ot_curation target safety
+      foreach:
+        - adverse_effects.tsv
+        - safety_risks.tsv
+        - secondary_pharmacology.json
+      do:
+        - name: copy ${each}
+          source: https://raw.githubusercontent.com/opentargets/curation/refs/tags/${ot_curation}/target_safety/${each}
+          destination: input/target/safety/${each}
+    - name: find_latest toxcast
+      source: gs://otar001-core/TargetSafety/data_files/toxcast
+      scratchpad_key: latest_toxcast
+    - name: copy toxcast
       requires:
-        - find_latest safety
-      source: ${latest_safety}
-      destination: input/target/safety/safetyLiabilities.json.gz
+        - find_latest toxcast
+      source: ${latest_toxcast}
+      destination: input/target/safety/toxcast.tsv
+    - name: find_latest aopwiki
+      source: gs://otar001-core/TargetSafety/data_files/aopwiki
+      scratchpad_key: latest_aopwiki
+    - name: copy aopwiki
+      requires:
+        - find_latest aopwiki
+      source: ${latest_aopwiki}
+      destination: input/target/safety/aopwiki.json
 
     - name: find_latest tep
       source: gs://otar001-core/TEPs

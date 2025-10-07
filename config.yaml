@@ -11,7 +11,7 @@ scratchpad:
   depmap_version: '2025Q2'
   hpo_version: '2025-01-16'
   mondo_version: '2025-02-04'
-  ot_curation: '25.09'
+  ot_curation: '25.12'
   probes_drugs_version: '01_2025'
 
 steps:
@@ -437,14 +437,21 @@ steps:
       source: ${latest_validation_lab}
       destination: input/evidence/validation_lab.json.gz
 
-    - name: find_latest encore
-      source: gs://otar013-ppp/encore
-      scratchpad_key: 'latest_encore'
-    - name: copy encore
-      requires:
-        - find_latest encore
-      source: ${latest_encore}
-      destination: input/evidence/encore.json.gz
+    - name: explode_glob encore files
+      glob: 'gs://otar013-ppp/encore/input/2024.01.11-Freeze4/**/**'
+      do:
+        - name: copy encore ${match_stem} ${uuid}
+          source: ${uri}
+          destination: input/evidence/encore/${match_path}${match_stem}.${match_ext}
+    - name: copy encore config
+      source: gs://otar013-ppp/PPP-evidence-configuration/encore_config.json
+      destination: input/evidence/encore/config.json
+    - name: copy sanger cell passport
+      source: https://cog.sanger.ac.uk/cmp/download/model_list_latest.csv.gz
+      destination: input/evidence/cell_passport.csv.gz
+    - name: copy ot_curation  depmap_tissue_mapping
+      source: https://raw.githubusercontent.com/opentargets/curation/${ot_curation}/mappings/biosystem/depmap_uberon_mapping.csv
+      destination: input/evidence/depmap_uberon_mapping.csv
 
     - name: find_latest ot_crispr
       source: gs://otar013-ppp/ot_crispr

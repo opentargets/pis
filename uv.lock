@@ -503,7 +503,7 @@ wheels = [
 
 [[package]]
 name = "opentargets-otter"
-version = "25.0.6"
+version = "25.0.9"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "filelock" },
@@ -514,9 +514,9 @@ dependencies = [
     { name = "requests" },
     { name = "urllib3" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/6a/7a/fdeb5ffd44ff98a7e2bfed45b91b1f5dd07383b041aed3739bea52b31621/opentargets_otter-25.0.6.tar.gz", hash = "sha256:2244a8d91bcc77de7814af7a1a9c97a11fe71370a1d6480e3a0d62038ff03c6b", size = 81964, upload-time = "2025-09-26T11:35:03.64Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/bb/7a/e2896c0809572fd128124065672f5334e83a858ead360629e6353d0f9898/opentargets_otter-25.0.9.tar.gz", hash = "sha256:4ff4eb931163b8268f7687ab324f5a794a8f7c00bfa0b78d3df9815f77ad1645", size = 82236, upload-time = "2025-10-07T14:06:00.413Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/96/30/700ed1067c7cd9e0425f82ccc718adb1a0bc7574446a174d7481ee5642ca/opentargets_otter-25.0.6-py3-none-any.whl", hash = "sha256:f9c40edf31a3532e8face0fb8206fd9a3d9b83e931b3e26d939ffca3e8eeae04", size = 49963, upload-time = "2025-09-26T11:35:02.236Z" },
+    { url = "https://files.pythonhosted.org/packages/6a/2c/af46ab2bd66ed86673bbb0ef85b4ceb535ad313eb68d407d3d8fdea5cb34/opentargets_otter-25.0.9-py3-none-any.whl", hash = "sha256:0e210345d4643929fe6f21c4dbe5702001fdb1b2ed036aaf53c3c6a496eb466b", size = 50289, upload-time = "2025-10-07T14:05:59.057Z" },
 ]
 
 [[package]]
@@ -530,7 +530,7 @@ wheels = [
 
 [[package]]
 name = "pis"
-version = "25.2.3.dev14"
+version = "25.2.3.dev16"
 source = { editable = "." }
 dependencies = [
     { name = "elasticsearch" },
@@ -572,7 +572,7 @@ requires-dist = [
     { name = "freezegun", marker = "extra == 'test'", specifier = "==1.5.1" },
     { name = "jq", specifier = "==1.8.0" },
     { name = "loguru", specifier = "==0.7.3" },
-    { name = "opentargets-otter", specifier = ">=25.0.6" },
+    { name = "opentargets-otter", specifier = ">=25.0.9" },
     { name = "pytest", marker = "extra == 'test'", specifier = "==8.3.4" },
     { name = "pytest-mock", marker = "extra == 'test'", specifier = "==3.14.0" },
     { name = "requests", specifier = ">=2.32.4" },

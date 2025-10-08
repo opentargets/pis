@@ -428,14 +428,15 @@ steps:
 
   #: EVIDENCE_PPP STEP :############################################################################
   evidence_ppp:
-    - name: find_latest validation_lab
-      source: gs://otar013-ppp/validation_lab
-      scratchpad_key: latest_validation_lab
-    - name: copy validation_lab
-      requires:
-        - find_latest validation_lab
-      source: ${latest_validation_lab}
-      destination: input/evidence/validation_lab.json.gz
+    - name: explode_glob download validation_lab files
+      glob: 'gs://otar013-ppp/validation_lab/input_data/2024.06/*'
+      do:
+        - name: copy validation_lab ${match_stem} ${uuid}
+          source: ${uri}
+          destination: input/evidence/validation_lab/${match_stem}.${match_ext}
+    - name: copy validation_lab config
+      source: gs://otar013-ppp/PPP-evidence-configuration/ValidationLab_config.json
+      destination: input/evidence/validation_lab/config.json
 
     - name: explode_glob encore files
       glob: 'gs://otar013-ppp/encore/input/2024.01.11-Freeze4/**/**'

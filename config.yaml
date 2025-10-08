@@ -453,14 +453,15 @@ steps:
       source: https://raw.githubusercontent.com/opentargets/curation/${ot_curation}/mappings/biosystem/depmap_uberon_mapping.csv
       destination: input/evidence/depmap_uberon_mapping.csv
 
-    - name: find_latest ot_crispr
-      source: gs://otar013-ppp/ot_crispr
-      scratchpad_key: 'latest_ot_crispr'
-    - name: copy ot_crispr
-      requires:
-        - find_latest ot_crispr
-      source: ${latest_ot_crispr}
-      destination: input/evidence/ot_crispr.json.gz
+    - name: explode_glob ot_crispr files
+      glob: 'gs://otar013-ppp/ot_crispr/input_data/**/*.txt'
+      do:
+        - name: copy ot_crispr ${match_stem} ${uuid}
+          source: ${uri}
+          destination: input/evidence/ot_crispr/${match_path}${match_stem}.${match_ext}
+    - name: copy ot_crispr config
+      source: gs://otar013-ppp/PPP-evidence-configuration/raw_study_table.tsv
+      destination: input/evidence/ot_crispr/config.tsv
   ##################################################################################################
 
   #: EXPRESSION STEP :##############################################################################

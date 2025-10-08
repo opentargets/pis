@@ -428,6 +428,10 @@ steps:
 
   #: EVIDENCE_PPP STEP :############################################################################
   evidence_ppp:
+    - name: copy sanger cell passport
+      source: https://cog.sanger.ac.uk/cmp/download/model_list_latest.csv.gz
+      destination: input/evidence/cell_passport.csv.gz
+
     - name: explode_glob download validation_lab files
       glob: 'gs://otar013-ppp/validation_lab/input_data/2024.06/*'
       do:
@@ -447,9 +451,6 @@ steps:
     - name: copy encore config
       source: gs://otar013-ppp/PPP-evidence-configuration/encore_config.json
       destination: input/evidence/encore/config.json
-    - name: copy sanger cell passport
-      source: https://cog.sanger.ac.uk/cmp/download/model_list_latest.csv.gz
-      destination: input/evidence/cell_passport.csv.gz
     - name: copy ot_curation  depmap_tissue_mapping
       source: https://raw.githubusercontent.com/opentargets/curation/${ot_curation}/mappings/biosystem/depmap_uberon_mapping.csv
       destination: input/evidence/depmap_uberon_mapping.csv

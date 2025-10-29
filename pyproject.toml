@@ -1,9 +1,9 @@
 [project]
 name = "PIS"
-version = "25.2.3.dev.17"
+version = "25.2.3.dev.18"
 description = "Open Targets Pipeline Input Stage"
 readme = "README.md"
-requires-python = ">=3.13"
+requires-python = "==3.13.*"
 authors = [{ name = "Open Targets Core Team", email = "devs@opentargets.net" }]
 license = { text = "Apache-2.0" }
 dependencies = [

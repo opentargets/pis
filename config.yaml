@@ -655,7 +655,7 @@ steps:
       destination: input/target/ensembl/homo_sapiens.json
 
     - name: copy gencode
-      source: https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_40/gencode.v40.annotation.gff3.gz
+      source: https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_49/gencode.v49.annotation.gff3.gz
       destination: input/target/gencode/gencode.gff3.gz
 
     - name: explode_glob download essentiality files

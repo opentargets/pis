@@ -1,16 +1,16 @@
 [project]
 name = "PIS"
-version = "25.2.3.dev.19"
+version = "25.2.3.dev.20"
 description = "Open Targets Pipeline Input Stage"
 readme = "README.md"
 requires-python = ">=3.11,<3.14"
 authors = [{ name = "Open Targets Core Team", email = "devs@opentargets.net" }]
 license = { text = "Apache-2.0" }
 dependencies = [
-  "elasticsearch==7.17.12",    # must be ^7.0.0 to be compatible with chembl es server
+  "elasticsearch==7.17.12",     # must be ^7.0.0 to be compatible with chembl es server
   "jq==1.8.0",
   "loguru==0.7.3",
-  "opentargets-otter>=25.0.9",
+  "opentargets-otter==25.0.16",
   "requests>=2.32.4",
   "urllib3>=2.5.0",
 ]

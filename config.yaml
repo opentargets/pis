@@ -569,6 +569,21 @@ steps:
       destination: input/literature/PMID_PMCID_DOI.csv.gz
   ##################################################################################################
 
+  #: ONTOMA STEP :##################################################################################
+  ontoma:
+    - name: copy ot disease curation
+      source: https://raw.githubusercontent.com/opentargets/curation/refs/tags/${ot_curation}/mappings/disease/manual_string.tsv
+      destination: input/ontoma/ot_disease_curation.tsv
+
+    - name: copy eva clinvar
+      source: https://ftp.ebi.ac.uk/pub/databases/eva/ClinVar/latest/eva_clinvar.txt
+      destination: input/ontoma/eva_clinvar.txt
+
+    - name: copy clinvar xrefs
+      source: https://ftp.ebi.ac.uk/pub/databases/eva/ClinVar/latest/clinvar_xrefs.txt
+      destination: input/ontoma/clinvar_xrefs.txt
+  ##################################################################################################
+
   #: OPENFDA STEP :#################################################################################
   # in case we want to test with only a few files, we can use the jq_filter:
   # '.results.drug.event.partitions[0:10] | map(.file)[]'

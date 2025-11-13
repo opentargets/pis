@@ -206,7 +206,7 @@ steps:
       foreach:
         - MGI_Gene_Model_Coord.rpt # Mouse gene mappings
         - MGI_PhenoGenoMP.rpt # Mouse PubMed references
-        - mp.owl # Mammalian Phenotype ontology
+        - mp.json # Mammalian Phenotype ontology
       do:
         - name: copy ${each}
           source: http://www.informatics.jax.org/downloads/reports/${each}

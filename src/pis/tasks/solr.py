@@ -6,6 +6,7 @@ from typing import IO, Any, Self
 
 import requests
 from loguru import logger
+from otter.storage import get_remote_storage
 from otter.task.model import Spec, Task, TaskContext
 from otter.task.task_reporter import report
 from otter.util.errors import OtterError
@@ -53,8 +54,6 @@ class Solr(Task):
         self.session: requests.Session
 
         self.local_path: Path = context.config.work_path / spec.destination
-        if context.config.release_uri:
-            self.remote_uri = f'{context.config.release_uri}/{spec.destination}'
 
     def _count_docs(self, data_type: str) -> int:
         """Return the number of documents for a given data type."""
@@ -106,13 +105,20 @@ class Solr(Task):
 
         for q in self.spec.queries:
             data_type, fields = q['data_type'], q.get('fields')
-            output_file = self.local_path / f'{data_type}.csv'
-            check_destination(output_file, delete=True)
+            local_file = self.local_path / f'{data_type}.csv'
+            check_destination(local_file, delete=True)
 
-            with open(output_file, 'wb') as f:
+            with open(local_file, 'wb') as f:
                 for batch in self._fetch_docs(data_type, fields):
                     self._save_docs(batch, f, trim_header=f.tell() > 0)
-            logger.info(f'fetched data type {data_type} to {output_file}')
+            logger.info(f'fetched data type {data_type} to {local_file}')
+
+            # upload results if remote storage configured
+            if self.context.config.release_uri:
+                remote_uri = f'{self.context.config.release_uri}/{self.spec.destination}/{data_type}.csv'
+                logger.debug(f'uploading {data_type} to {remote_uri}')
+                remote_storage = get_remote_storage(remote_uri)
+                remote_storage.upload(local_file, remote_uri)
 
         return self
 

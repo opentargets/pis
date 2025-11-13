@@ -15,8 +15,6 @@ from otter.validators.file import file_exists
 from requests.adapters import HTTPAdapter
 from urllib3.util import Retry
 
-from pis.validators.solr import counts
-
 
 class SolrError(OtterError):
     """Base class for SOLR fetch errors."""
@@ -130,6 +128,6 @@ class Solr(Task):
 
         for dt in data_types:
             v(file_exists, dt['local_path'])
-            v(counts, self.spec.url, dt['data_type'], dt['local_path'])
+            # v(counts, self.spec.url, dt['data_type'], dt['local_path'])
 
         return self

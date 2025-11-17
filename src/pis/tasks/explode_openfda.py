@@ -2,6 +2,7 @@
 
 import json
 from pathlib import Path
+from queue import Queue
 from typing import Any, Self
 
 import jq
@@ -88,13 +89,15 @@ class ExplodeOpenfda(Task):
         trimmed_sources = [source.replace(self.spec.prefix, '') for source in sources]
         logger.debug(f'exploding {description} into {len(self.spec.do)} tasks by {len(trimmed_sources)} iterations')
         new_tasks = 0
+        subtask_queue: Queue[Spec] = self.context.sub_queue
 
         for i in trimmed_sources:
             self.scratchpad.store('each', i)
 
             for do_spec in self.spec.do:
-                replaced_do_spec = Spec.model_validate(self.scratchpad.replace_dict(do_spec.model_dump()))
-                self.context.specs.append(replaced_do_spec)
+                subtask_spec = do_spec.model_validate(self.scratchpad.replace_dict(do_spec.model_dump()))
+                subtask_spec.task_queue = subtask_queue
+                subtask_queue.put(subtask_spec)
                 new_tasks += 1
 
         logger.info(f'exploded into {new_tasks} new tasks')

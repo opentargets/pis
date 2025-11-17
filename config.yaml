@@ -418,7 +418,13 @@ steps:
   evidence_panel_app:
     - name: copy panel_app
       source: gs://otar000-evidence_input/GenomicsEngland/data_files/All_genes_20250525_public_v1plus_genes_all_ratings.tsv
-      destination: input/evidence/panel_app.tsv
+      destination: input/evidence/panelapp/panel_app.tsv
+    - name: panel_app fetch
+      requires:
+        - copy panel_app
+      evidence_file: input/evidence/panelapp/panel_app.tsv
+      api_url: https://panelapp.genomicsengland.co.uk/api/v1/panels
+      destination: input/evidence/panelapp/panels.jsonl
   ##################################################################################################
 
   #: EVIDENCE_ORPHANET STEP :#######################################################################

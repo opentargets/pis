@@ -12,7 +12,7 @@ scratchpad:
   depmap_version: '2025Q2'
   hpo_version: '2025-01-16'
   mondo_version: '2025-02-04'
-  ot_curation: '25.12'
+  ot_curation: '25.12.2'
   probes_drugs_version: '02_2025'
 
 steps:
@@ -468,6 +468,22 @@ steps:
         - find_latest uniprot_variants
       source: ${latest_uniprot_variants}
       destination: input/evidence/uniprot_variants.json.gz
+  ##################################################################################################
+
+  #: EVIDENCE_INTOGEN STEP :#######################################################################
+  evidence_intogen:
+    - name: explode intogen files
+      foreach:
+        - Compendium_Cancer_Genes.tsv
+        - cohorts.tsv
+      do:
+        - name: copy ${each}
+          source: gs://otar000-evidence_input/IntOgen/data_files/2024.06/${each}
+          destination: input/evidence/intogen/${each}
+
+    - name: copy ot_curation disease_mapping
+      source: https://raw.githubusercontent.com/opentargets/curation/${ot_curation}/mappings/disease/cancer2EFO_mappings.tsv
+      destination: input/ot_curation/mappings/disease/cancer2EFO_mappings.tsv
   ##################################################################################################
 
   #: EVIDENCE_PPP STEP :############################################################################

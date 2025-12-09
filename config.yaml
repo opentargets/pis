@@ -124,7 +124,6 @@ steps:
         - black_box_warning
         - molecule_synonyms
         - cross_references
-        - chebi_par_id
         - molecule_structures
     - name: elasticsearch chembl target
       url: https://www.ebi.ac.uk/chembl/elk/es
@@ -141,7 +140,7 @@ steps:
   #: IMPC STEP :####################################################################################
   impc:
     - name: solr fetch gene_gene
-      destination: input/evidence/impc
+      destination: input/impc
       url: http://www.ebi.ac.uk/mi/impc/solr/phenodigm/select
       queries:
         - data_type: gene_gene
@@ -150,7 +149,7 @@ steps:
             - hgnc_gene_id
 
     - name: solr fetch ontology_ontology
-      destination: input/evidence/impc
+      destination: input/impc
       url: http://www.ebi.ac.uk/mi/impc/solr/phenodigm/select
       queries:
         - data_type: ontology_ontology
@@ -159,7 +158,7 @@ steps:
             - hp_id
 
     - name: solr fetch mouse_model
-      destination: input/evidence/impc
+      destination: input/impc
       url: http://www.ebi.ac.uk/mi/impc/solr/phenodigm/select
       queries:
         - data_type: mouse_model
@@ -168,7 +167,7 @@ steps:
             - model_phenotypes
 
     - name: solr fetch disease
-      destination: input/evidence/impc
+      destination: input/impc
       url: http://www.ebi.ac.uk/mi/impc/solr/phenodigm/select
       queries:
         - data_type: disease
@@ -177,7 +176,7 @@ steps:
             - disease_phenotypes
 
     - name: solr fetch disease_model_summary
-      destination: input/evidence/impc
+      destination: input/impc
       url: http://www.ebi.ac.uk/mi/impc/solr/phenodigm/select
       batch_size: 100000000
       queries:
@@ -193,7 +192,7 @@ steps:
             - marker_id
 
     - name: solr fetch ontology
-      destination: input/evidence/impc
+      destination: input/impc
       url: http://www.ebi.ac.uk/mi/impc/solr/phenodigm/select
       queries:
         - data_type: ontology
@@ -210,7 +209,7 @@ steps:
       do:
         - name: copy ${each}
           source: http://www.informatics.jax.org/downloads/reports/${each}
-          destination: input/evidence/impc/${each}
+          destination: input/impc/${each}
 
     - name: copy gene name
       source: https://storage.googleapis.com/public-download-files/hgnc/tsv/tsv/hgnc_complete_set.txt
@@ -313,7 +312,7 @@ steps:
       validate_version: 1
 
     - name: copy crispr_brain mappings
-      source: https://raw.githubusercontent.com/opentargets/curation/refs/heads/master/mappings/disease/brain_crispr_studies.tsv
+      source: https://raw.githubusercontent.com/opentargets/curation/refs/tags/${ot_curation}/mappings/disease/brain_crispr_studies.tsv
       destination: input/ot_curation/mappings/disease/brain_crispr_studies.tsv
   ##################################################################################################
 
@@ -379,7 +378,7 @@ steps:
         - gene_burden/curated_evidence.tsv
       do:
         - name: copy ${each}
-          source: https://raw.githubusercontent.com/opentargets/curation/refs/heads/${ot_curation}/${each}
+          source: https://raw.githubusercontent.com/opentargets/curation/refs/tags/${ot_curation}/${each}
           destination: input/ot_curation/${each}
   ##################################################################################################
 
@@ -546,7 +545,7 @@ steps:
       destination: input/expression/map_with_efos.json
 
     - name: copy normal tissues
-      source: https://www.proteinatlas.org/download/tsv/normal_tissue.tsv.zip
+      source: https://www.proteinatlas.org/download/tsv/normal_ihc_data.tsv.zip
       destination: input/expression/normal_tissue.tsv.zip
 
     - name: find_latest baseline expression binned
@@ -612,11 +611,18 @@ steps:
       destination: input/interaction/string-interactions.txt.gz
   ##################################################################################################
 
+  #: ENHANCER TO GENE STEP
+  enhancer_to_gene:
+    - name: explode_glob rE2G interval
+      glob: gs://interval_data/datasets/ENCODE-rE2G/processed_E2G_2509_filtered.parquet/*.parquet
+      do:
+        - name: copy rE2G interval ${match_stem}
+          source: ${match_prefix}/${match_path}${match_stem}.${match_ext}
+          destination: output/enhancer_to_gene/${uuid}.parquet
+  ##################################################################################################
+
   #: L2G STEP :#####################################################################################
   l2g:
-    - name: copy l2g model
-      source: gs://ot_orchestration/benchmarks/l2g/fm0/v5.1_best_cv/locus_to_gene_model/classifier.skops
-      destination: etc/model/l2g_prediction/classifier.skops
     - name: explode_glob l2g gold_standard
       glob: gs://genetics-portal-dev-analysis/yt4/2506_release/training_set/20250625_gentropy_paper_v1.json/*.json
       do:
@@ -630,6 +636,14 @@ steps:
     - name: copy literature
       source: https://ftp.ebi.ac.uk/pub/databases/pmc/DOI/PMID_PMCID_DOI.csv.gz
       destination: input/literature/PMID_PMCID_DOI.csv.gz
+
+    - name: explode_glob literature dating lut
+      glob: gs://otar000-evidence_input/literature_export/*.json.gz
+      do:
+        - name: copy literature dating lut ${match_stem}
+          source: ${match_prefix}/${match_path}${match_stem}.${match_ext}
+          destination: input/literature/literature_export/${uuid}.json.gz
+
   ##################################################################################################
 
   #: ONTOMA STEP :##################################################################################
@@ -752,16 +766,20 @@ steps:
           destination: input/target/gene-essentiality/depmap/${match_stem}.${match_ext}
 
     - name: copy ot_curation depmap_tissue_mapping
-      source: https://raw.githubusercontent.com/opentargets/otar/refs/tags/${ot_curation}/gene-essentiality/depmap_uberon_mapping.csv
+      source: https://raw.githubusercontent.com/opentargets/curation/refs/tags/${ot_curation}/mappings/biosystem/depmap_uberon_mapping.csv
       destination: input/ot_curation/mappings/biosystem/depmap_uberon_mapping.csv
 
-    - name: copy gene name
+    - name: copy gene name tsv
       source: https://storage.googleapis.com/public-download-files/hgnc/tsv/tsv/hgnc_complete_set.txt
       destination: input/target/genenames/hgnc_complete_set.tsv
 
+    - name: copy gene name json
+      source: https://storage.googleapis.com/public-download-files/hgnc/json/json/hgnc_complete_set.json
+      destination: input/target/genenames/hgnc_complete_set.json
+
     - name: copy gnomad
-      source: https://storage.googleapis.com/gcp-public-data--gnomad/release/2.1.1/constraint/gnomad.v2.1.1.lof_metrics.by_gene.txt.bgz
-      destination: input/target/gnomad/gnomad.v2.1.1.lof_metrics.by_gene.txt.bgz
+      source: https://storage.googleapis.com/gcp-public-data--gnomad/release/${gnomad_version}/constraint/gnomad.v${gnomad_version}.constraint_metrics.tsv
+      destination: input/target/gnomad/gnomad_constraint_metrics.tsv
 
     - name: copy go annotation human eco gpa
       source: https://ftp.ebi.ac.uk/pub/databases/GO/goa/HUMAN/goa_human.gpa.gz
@@ -810,10 +828,10 @@ steps:
           destination: input/target/homologue/gene_dictionary/${each}.json
         - name: copy ${each} protein homology
           source: https://ftp.ensembl.org/pub/release-${ensembl_version}/tsv/ensembl-compara/homologies/${each}/Compara.${ensembl_version}.protein_default.homologies.tsv.gz
-          destination: input/target/homologue/homologies/protein-${each}.tsv
+          destination: input/target/homologue/homologies/protein-${each}.tsv.gz
         - name: copy ${each} ncrna homology
           source: https://ftp.ensembl.org/pub/release-${ensembl_version}/tsv/ensembl-compara/homologies/${each}/Compara.${ensembl_version}.ncrna_default.homologies.tsv.gz
-          destination: input/target/homologue/homologies/ncrna-${each}.tsv
+          destination: input/target/homologue/homologies/ncrna-${each}.tsv.gz
 
     - name: copy homology ensembl vertebrates
       source: https://ftp.ensembl.org/pub/release-${ensembl_version}/species_EnsemblVertebrates.txt

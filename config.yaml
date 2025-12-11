@@ -58,14 +58,8 @@ steps:
       source: https://www.probes-drugs.org/media/download/probes/pd_export_${probes_drugs_version}_probes_standardized.xlsx
       destination: input/target/chemicalprobes/probes.xlsx
 
-    - name: find_latest drugbank annotation
-      source: gs://otar001-core/DrugBank/annotation
-      scratchpad_key: latest_drugbank_annotation
-
     - name: copy drugbank annotation
-      requires:
-        - find_latest drugbank annotation
-      source: ${latest_drugbank_annotation}
+      source: https://ftp.ebi.ac.uk/pub/databases/chembl/UniChem/data/wholeSourceMapping/src_id1/src1src2.txt.gz
       destination: input/drug/drugbank.csv.gz
 
     - name: elasticsearch chembl drug indication

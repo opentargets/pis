@@ -3,7 +3,7 @@ work_path: ./work
 log_level: INFO
 pool_size: 16
 
-release_uri: gs://open-targets-pre-data-releases/uo_test_otter
+release_uri: gs://ot_orchestration/pis/encode
 scratchpad:
   chembl_version: '36'
   efo_version: '3.83.0'
@@ -934,4 +934,23 @@ steps:
     - name: copy mouse phenotype scores
       source: https://raw.githubusercontent.com/opentargets/target_engine/main/src/data_flow/phenotypeScores/20230825_mousePheScores.csv
       destination: input/target_engine/mouse_pheno_scores.csv
+  ##################################################################################################
+
+
+  encode_rE2G:
+    - name: copy encode rE2G manifest
+      source: https://www.encodeproject.org/report.tsv?type=File&searchTerm=encode-re2g+thresholded&output_type=thresholded+element+gene+links&status=released&limit=all
+      destination: input/encode-rE2G/e2g_manifest.tsv
+
+    - name: crawl_encode rE2G manifest
+      requires:
+        - copy encode rE2G manifest
+      manifest: input/encode-rE2G/e2g_manifest.tsv
+      columns:
+        accession: 'Accession'
+        url_stem:  'Download URL'
+      expand: # COPY task template
+        name: copy encode rE2G ${accession}
+        source: https://www.encodeproject.org${url_stem}
+        destination: input/encode-rE2G/${accession}.bed.gz
   ##################################################################################################

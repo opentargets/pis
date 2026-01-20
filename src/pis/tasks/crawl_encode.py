@@ -1,7 +1,7 @@
 """Generate tasks for ENCODE file download."""
 
 import asyncio
-import csv  # use csv to skip additional depenencies.
+import csv  # use csv to skip additional dependencies.
 from enum import StrEnum
 from pathlib import Path
 from typing import Any, Self
@@ -30,7 +30,7 @@ class GCSUploadError(Exception):
     """Raised when there is an error uploading to GCS."""
 
 
-class EncodeManifestMissingValuError(Exception):
+class EncodeManifestMissingValueError(Exception):
     """Raised when a required value is missing from the ENCODE manifest file."""
 
 
@@ -71,9 +71,11 @@ class EncodeManifestSchema(BaseModel):
         with the search parameters used to generate the manifest.
 
         :param manifest_path: Path to the manifest file.
+        :type manifest_path: Path
         :return: A dictionary mapping accession IDs to file URL stems.
+        :rtype: dict[str, str]
         :raises EncodeManifestSchemaValidationError: If the manifest file is malformed.
-        :raises EncodeManifestMissingValuError: If required values are missing in the manifest.
+        :raises EncodeManifestMissingValueError: If required values are missing in the manifest.
 
         """
         with open(manifest_path, encoding='utf-8') as f:
@@ -99,7 +101,7 @@ class EncodeManifestSchema(BaseModel):
                 if not url_stem or not accession:
                     msg = f'Missing required value in manifest row: url_stem="{url_stem}", accession="{accession}".'
                     logger.error(msg)
-                    raise EncodeManifestMissingValuError(msg)
+                    raise EncodeManifestMissingValueError(msg)
                 file_stems[accession] = url_stem
 
         return file_stems
@@ -134,7 +136,17 @@ class CrawlEncodeSpec(Spec):
     @field_validator('expand', mode='after')
     @classmethod
     def _check_patterns(cls, expand: CopySpec) -> CopySpec:
-        """Ensure that the `source` field in the CopySpec contains required templated variables."""
+        """Ensure that the `expand` - CopySpec contains the required template variables.
+
+        The `source` field must contain the `${url_stem}` template variable,
+        and the `destination` field must contain the `${accession}` template variable.
+
+        :param expand: CopySpec to validate.
+        :type expand: CopySpec
+        :return: Validated CopySpec.
+        :rtype: CopySpec
+        :raises ValidationError: If required template variables are missing.
+        """
         if '${' + CrawlEncodeTemplateVariable.URL_STEM.value + '}' not in expand.source:
             msg = f'COPY task `source` must contain the `{CrawlEncodeTemplateVariable.URL_STEM.value}` template.'
             logger.error(msg)
@@ -149,16 +161,21 @@ class CrawlEncodeSpec(Spec):
     def _resolve_destination(self, context: TaskContext) -> CopySpec:
         """Resolve the destination path for the download.
 
+        :param context: TaskContext with global configuration.
+        :type context: TaskContext
+        :return: CopySpec with resolved destination path.
+        :rtype: CopySpec
+        :raises GCSUploadError: If the `release_uri` is invalid.
+
         Depending on whether `release_uri` is set in the global configuration,
-        the destination path will be adjusted to point to either a local path
-        or a GCS path.
+        the destination path will be adjusted to point to either a local path (relative to `work_path`)
+        or a GCS path (relative to the `release_uri`).
         """
         release_uri = context.config.release_uri
         if not release_uri:
             logger.info('Transferring files to local path')
-            work = context.config.work_path
             # Overwrite the destination to be local path
-            full_path = work / Path(self.expand.destination)
+            full_path = context.config.work_path / Path(self.expand.destination)
             # Ensure the relative path exists
             full_path.parent.mkdir(parents=True, exist_ok=True)
             self.expand.destination = full_path.as_posix()
@@ -206,7 +223,9 @@ class CrawlEncode(Task):
         """Fetch all files specified in the list of CopySpec asynchronously.
 
         :param specs_list: List of CopySpec to process.
+        :type specs_list: list[CopySpec]
         :param max_concurrent: Maximum number of concurrent downloads.
+        :type max_concurrent: int
         """
         semaphore = asyncio.Semaphore(max_concurrent)
         async with aiohttp.ClientSession() as session:
@@ -218,10 +237,10 @@ class CrawlEncode(Task):
     async def _write_local_file(destination: str, response: aiohttp.ClientResponse) -> None:
         """Write content to a local file.
 
-        There is no error handling in the local writer, as we would not expect failures.
-
         :param destination: Local path to write to.
+        :type destination: str
         :param response: aiohttp ClientResponse with the content to write.
+        :type response: aiohttp.ClientResponse
         :raises IOError: If there is an error writing to the local file.
         """
         async with aiofiles.open(destination, 'wb') as fp:
@@ -237,8 +256,11 @@ class CrawlEncode(Task):
         This method consumes the response content and uploads it to GCS.
 
         :param destination: GCS path to write to (gs://bucket/path).
+        :type destination: str
         :param response: aiohttp ClientResponse with the content to upload.
+        :type response: aiohttp.ClientResponse
         :param session: aiohttp ClientSession to use for requests.
+        :type session: aiohttp.ClientSession
         :raises GCSUploadError: If there is an error uploading to GCS.
         """
         client = Storage(session=session)
@@ -267,11 +289,16 @@ class CrawlEncode(Task):
     ) -> None:
         """Asynchronously copy a file from source to destination using aiohttp.
 
-        param source: Source URL to download from.
-        param destination: Destination path to write to (local path or gs:// path).
-        param session: aiohttp ClientSession to use for requests.
-        param semaphore: Semaphore to limit concurrent downloads.
-        param retries: Number of retries for failed downloads.
+        :param source: Source URL to download from.
+        :type source: str
+        :param destination: Destination path to write to (local path or gs:// path).
+        :type destination: str
+        :param session: aiohttp ClientSession to use for requests.
+        :type session: aiohttp.ClientSession
+        :param semaphore: Semaphore to limit concurrent downloads.
+        :type semaphore: asyncio.Semaphore
+        :param retries: Number of retries for failed downloads.
+        :type retries: int
         """
         async with semaphore:
             for attempt in range(retries):
@@ -295,6 +322,7 @@ class CrawlEncode(Task):
         """Run the ENCODE file download task.
 
         :return: Self instance.
+        :rtype: Self
         """
         logger.info(f'Parsing ENCODE manifest file from {self.spec.manifest}.')
         file_stems = self.spec.columns.parse_manifest(self.manifest_local_path)
@@ -319,7 +347,11 @@ class CrawlEncode(Task):
 
     @report
     def validate(self) -> Self:
-        """Check that the downloaded file exists and has a valid size."""
+        """Check that the downloaded file exists and has a valid size.
+
+        :return: Self instance.
+        :rtype: Self
+        """
         all_exist = all_blobs_exist if self.context.config.release_uri else all_files_exist
         paths = [spec.destination for spec in self.transfer_specs]
         v(all_exist, paths)

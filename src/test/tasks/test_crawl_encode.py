@@ -1,10 +1,19 @@
 """Tests for the CrawlEncode task."""
 
 from pathlib import Path
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
+from otter.task.model import TaskContext
+from otter.tasks.copy import CopySpec
 
-from pis.tasks.crawl_encode import CrawlEncode, EncodeManifestMissingValuError
+from pis.tasks.crawl_encode import (
+    CrawlEncode,
+    CrawlEncodeSpec,
+    EncodeManifestMissingValueError,
+    EncodeManifestSchema,
+    EncodeManifestSchemaValidationError,
+)
 
 URL_STEM_COL = 'File download URL'
 ACCESSION_COL = 'Accession'
@@ -68,7 +77,7 @@ class TestParseManifest:
         """Test successful parsing of valid manifest files."""
         self._write_manifest(manifest_file, header, rows)
 
-        result = CrawlEncode._parse_manifest(manifest_file, URL_STEM_COL, ACCESSION_COL)
+        result = EncodeManifestSchema(url_stem=URL_STEM_COL, accession=ACCESSION_COL).parse_manifest(manifest_file)
 
         assert result == expected
 
@@ -99,8 +108,10 @@ class TestParseManifest:
         """Test error when required column is missing from manifest."""
         self._write_manifest(manifest_file, header, rows)
 
-        with pytest.raises(ValueError, match=f'Manifest file is missing required column.*{missing_col}'):
-            CrawlEncode._parse_manifest(manifest_file, URL_STEM_COL, ACCESSION_COL)  # noqa: SLF001
+        with pytest.raises(
+            EncodeManifestSchemaValidationError, match=f'Manifest file is missing required column.*{missing_col}'
+        ):
+            EncodeManifestSchema(url_stem=URL_STEM_COL, accession=ACCESSION_COL).parse_manifest(manifest_file)
 
     @pytest.mark.parametrize(
         ('header', 'rows'),
@@ -137,13 +148,95 @@ class TestParseManifest:
     ) -> None:
         """Test error when required data values are missing in rows."""
         self._write_manifest(manifest_file, header, rows)
-
-        with pytest.raises(EncodeManifestMissingValuError, match='Missing required value in manifest row'):
-            CrawlEncode._parse_manifest(manifest_file, URL_STEM_COL, ACCESSION_COL)  # noqa: SLF001
+        with pytest.raises(EncodeManifestMissingValueError, match='Missing required value in manifest row'):
+            EncodeManifestSchema(url_stem=URL_STEM_COL, accession=ACCESSION_COL).parse_manifest(manifest_file)
 
     def test_parse_manifest_empty_file(self, manifest_file: Path) -> None:
         """Test error when manifest file has no header (only search params)."""
         manifest_file.write_text(SEARCH_PARAMS, encoding='utf-8')
 
-        with pytest.raises(ValueError, match='Manifest file is empty or malformed'):
-            CrawlEncode._parse_manifest(manifest_file, URL_STEM_COL, ACCESSION_COL)  # noqa: SLF001
+        with pytest.raises(EncodeManifestSchemaValidationError, match='Manifest file is empty or malformed'):
+            EncodeManifestSchema(url_stem=URL_STEM_COL, accession=ACCESSION_COL).parse_manifest(manifest_file)
+
+
+class TestCrawlEncodeIntegration:
+    """Integration tests for CrawlEncode task."""
+
+    @pytest.fixture
+    def manifest_file(self, tmp_path: Path) -> Path:
+        """Create a test manifest file."""
+        manifest = tmp_path / 'manifest.tsv'
+        lines = [
+            SEARCH_PARAMS,
+            '\t'.join([URL_STEM_COL, ACCESSION_COL]),
+            '/files/ENCFF001/@@download/ENCFF001.bed.gz\tENCFF001',
+            '/files/ENCFF002/@@download/ENCFF002.bed.gz\tENCFF002',
+        ]
+        manifest.write_text('\n'.join(lines), encoding='utf-8')
+        return manifest
+
+    @pytest.fixture
+    def task_context(self, tmp_path: Path) -> TaskContext:
+        """Create a mock TaskContext."""
+        context = MagicMock()
+        context.config = MagicMock()
+        context.config.work_path = tmp_path
+        context.config.release_uri = None
+        return context
+
+    @pytest.fixture
+    def crawl_encode_spec(self, manifest_file: Path) -> CrawlEncodeSpec:
+        """Create a CrawlEncodeSpec for testing."""
+        return CrawlEncodeSpec(
+            name='crawl_encode test',
+            manifest=manifest_file.name,
+            columns=EncodeManifestSchema(url_stem=URL_STEM_COL, accession=ACCESSION_COL),
+            expand=CopySpec(
+                name='copy encode files',
+                source='https://www.encodeproject.org${url_stem}',
+                destination='encode_files/${accession}.bed.gz',
+            ),
+        )
+
+    def test_crawl_encode_run_transfer_all_with_local_fs(
+        self,
+        tmp_path: Path,
+        task_context: TaskContext,
+        crawl_encode_spec: CrawlEncodeSpec,
+    ) -> None:
+        """Test CrawlEncode.run() transfers files to local path."""
+        task_context.config.work_path = tmp_path
+
+        task = CrawlEncode(crawl_encode_spec, task_context)
+
+        with patch.object(CrawlEncode, '_transfer_all', new_callable=AsyncMock) as mock_transfer:
+            mock_transfer.return_value = None
+            task.run()
+
+            # Verify that _transfer_all was called with correct specs
+            mock_transfer.assert_called_once()
+            specs = mock_transfer.call_args[0][0]
+            assert len(specs) == 2
+            assert specs[0].destination == str(tmp_path / 'encode_files' / 'ENCFF001.bed.gz')
+            assert specs[1].destination == str(tmp_path / 'encode_files' / 'ENCFF002.bed.gz')
+
+    def test_crawl_encode_run_transfer_all_with_gcs(
+        self,
+        task_context: TaskContext,
+        crawl_encode_spec: CrawlEncodeSpec,
+    ) -> None:
+        """Test CrawlEncode.run() transfers files to GCS path."""
+        task_context.config.release_uri = 'gs://my-bucket/releases'
+
+        task = CrawlEncode(crawl_encode_spec, task_context)
+
+        with patch.object(CrawlEncode, '_transfer_all', new_callable=AsyncMock) as mock_transfer:
+            mock_transfer.return_value = None
+            task.run()
+
+            # Verify that _transfer_all was called with correct GCS specs
+            mock_transfer.assert_called_once()
+            specs = mock_transfer.call_args[0][0]
+            assert len(specs) == 2
+            assert specs[0].destination == 'gs://my-bucket/releases/encode_files/ENCFF001.bed.gz'
+            assert specs[1].destination == 'gs://my-bucket/releases/encode_files/ENCFF002.bed.gz'

@@ -1,24 +1,23 @@
 """Generate tasks for ENCODE file download."""
 
+import asyncio
 import csv  # use csv to skip additional depenencies.
 from enum import StrEnum
 from pathlib import Path
-from queue import Queue
 from typing import Any, Self
 
+import aiofiles
+import aiohttp
+from aiohttp.client_exceptions import ClientError
+from google.cloud import storage
 from loguru import logger
 from otter.scratchpad.model import Scratchpad
+from otter.storage import get_remote_storage
 from otter.task.model import Spec, Task, TaskContext
 from otter.task.task_reporter import report
 from otter.tasks.copy import CopySpec
-from pydantic import BaseModel
-
-
-class TemplateVariable(StrEnum):
-    """Template variables for ENCODE manifest processing."""
-
-    URL_STEM = 'url_stem'
-    ACCESSION = 'accession'
+from pydantic import BaseModel, field_validator
+from tqdm.asyncio import tqdm
 
 
 class EncodeManifestMissingValuError(Exception):
@@ -96,6 +95,13 @@ class EncodeManifestSchema(BaseModel):
         return file_stems
 
 
+class TemplateVariable(StrEnum):
+    """Template variables for ENCODE manifest processing."""
+
+    URL_STEM = 'url_stem'
+    ACCESSION = 'accession'
+
+
 class CrawlEncodeSpec(Spec):
     """Configuration fields for the task for downloading ENCODE data files."""
 
@@ -115,10 +121,11 @@ class CrawlEncodeSpec(Spec):
         """
         self.scratchpad_ignore_missing = True
 
-    @model_validator('do', mode='after')
+    @field_validator('do', mode='after')
+    @classmethod
     def _check_patterns(cls, expand: CopySpec) -> CopySpec:
         """Ensure that the `destination` field in the CopySpec contains required templated variables."""
-        if "${" + TemplateVariable.URL_STEM. in expand.destination:
+        if '${' + TemplateVariable.URL_STEM.value + '}' in expand.destination:
             msg = f'COPY task `destination` must contain the `{TemplateVariable.URL_STEM.value}` templated variable.'
             logger.error(msg)
             raise ValueError(msg)
@@ -141,27 +148,67 @@ class CrawlEncode(Task):
         super().__init__(spec, context)
         self.spec: CrawlEncodeSpec
         self.manifest_local_path = context.config.work_path / Path(spec.manifest)
-        self.scratchpad = Scratchpad({'accession': '', 'url_stem': ''})
+        self.scratchpad = Scratchpad({
+            TemplateVariable.ACCESSION.value: '',
+            TemplateVariable.URL_STEM.value: '',
+        })
+
+    @staticmethod
+    async def _copy_all(specs_list: list[CopySpec], max_concurrent: int) -> None:
+        """Fetch all files specified in the list of CopySpec asynchronously.
+
+        :param specs_list: List of CopySpec to process.
+        :param max_concurrent: Maximum number of concurrent downloads.
+        """
+        semaphore = asyncio.Semaphore(max_concurrent)
+        queue = asyncio.Queue()
+        async with aiohttp.ClientSession() as session:
+            tasks = [CrawlEncode._copy(spec.source, spec.destination, session, semaphore) for spec in specs_list]
+            for f in tqdm(asyncio.as_completed(tasks), total=len(tasks), desc='Transferring files.'):
+                await f
+
+    @staticmethod
+    async def _copy(
+        source: str, destination: str, session: aiohttp.ClientSession, semaphore: asyncio.Semaphore, retries: int = 3
+    ) -> None:
+        """Asynchronously copy a file from source to destination using aiohttp."""
+        async with semaphore:
+            for attempt in range(retries):
+                try:
+                    async with session.get(source, timeout=aiohttp.ClientTimeout(total=600)) as response:
+                        response.raise_for_status()
+                        async with aiofiles.open(destination, 'wb') as fp:
+                            async for chunk in response.content.iter_chunked(1024 * 1024):
+                                await fp.write(chunk)
+                    return  # Success, exit the function
+                except ClientError as e:
+                    logger.warning(f'Attempt {attempt + 1} failed to download {source}: {e}')
+                    if attempt == retries - 1:
+                        logger.error(f'All {retries} attempts failed for {source}.')
+                        raise
+                    await asyncio.sleep(1 + attempt * 2)  # Exponential backoff
 
     @report
     def run(self) -> Self:
         """Run the ENCODE file download task."""
-        logger.info(f'Processing ENCODE manifest file from {self.spec.manifest}.')
+        logger.info(f'Parsing ENCODE manifest file from {self.spec.manifest}.')
         file_stems = self.spec.columns.parse_manifest(self.manifest_local_path)
-        new_tasks = 0
+        logger.info(f'Found {len(file_stems)} files to download.')
+        template_spec = self.spec.expand
         # Loop over each file stem
+        specs = []
         for accession, url_stem in file_stems.items():
-            subtask_queue: Queue[Spec] = self.context.sub_queue
             logger.info(f'Building task for experiment: {accession} from {url_stem} file.')
             self.scratchpad.store('accession', accession)
             self.scratchpad.store('url_stem', url_stem)
 
             # Substitute values in CopySpec and enqueue new tasks
-            for do_spec in self.spec.do:
-                # Create a new CopySpec with the current scratchpad values
-                subtask_spec = do_spec.model_validate(self.scratchpad.replace_dict(do_spec.model_dump()))
-                subtask_spec.task_queue = subtask_queue
-                subtask_queue.put(subtask_spec)
-                new_tasks += 1
-        logger.info(f'Enqueued {new_tasks} download tasks from ENCODE manifest.')
+            # Create a new CopySpec with the current scratchpad values
+            subtask_spec = template_spec.model_validate(self.scratchpad.replace_dict(template_spec.model_dump()))
+            specs.append(subtask_spec)
+
+        self._
+
+        logger.info(f'Enqueued {len(specs)} download tasks from ENCODE manifest.')
+
         return self

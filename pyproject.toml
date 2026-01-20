@@ -7,11 +7,15 @@ requires-python = ">=3.11,<3.14"
 authors = [{ name = "Open Targets Core Team", email = "devs@opentargets.net" }]
 license = { text = "Apache-2.0" }
 dependencies = [
-  "elasticsearch==7.17.12",     # must be ^7.0.0 to be compatible with chembl es server
+  "aiofiles>=25.1.0",
+  "aiohttp>=3.13.3",
+  "asyncio>=4.0.0",
+  "elasticsearch==7.17.12",
   "jq==1.8.0",
   "loguru==0.7.3",
   "opentargets-otter==25.0.16",
   "requests>=2.32.4",
+  "tqdm>=4.67.1",
   "urllib3>=2.5.0",
 ]
 

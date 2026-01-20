@@ -11,6 +11,7 @@ dependencies = [
   "aiohttp>=3.13.3",
   "asyncio>=4.0.0",
   "elasticsearch==7.17.12",
+  "gcloud-aio-storage>=9.6.1",
   "jq==1.8.0",
   "loguru==0.7.3",
   "opentargets-otter==25.0.16",

@@ -9,15 +9,25 @@ from typing import Any, Self
 import aiofiles
 import aiohttp
 from aiohttp.client_exceptions import ClientError
-from google.cloud import storage
+from gcloud.aio.storage import Storage
 from loguru import logger
 from otter.scratchpad.model import Scratchpad
-from otter.storage import get_remote_storage
 from otter.task.model import Spec, Task, TaskContext
 from otter.task.task_reporter import report
 from otter.tasks.copy import CopySpec
-from pydantic import BaseModel, field_validator
+from otter.validators import v
+from pydantic import BaseModel, ValidationError, field_validator
 from tqdm.asyncio import tqdm
+
+from pis.validators.crawl_encode import all_blobs_exist, all_files_exist
+
+
+class HTTPAsyncDownloadError(Exception):
+    """Raised when there is an error downloading a file via HTTP asynchronously."""
+
+
+class GCSUploadError(Exception):
+    """Raised when there is an error uploading to GCS."""
 
 
 class EncodeManifestMissingValuError(Exception):
@@ -95,8 +105,8 @@ class EncodeManifestSchema(BaseModel):
         return file_stems
 
 
-class TemplateVariable(StrEnum):
-    """Template variables for ENCODE manifest processing."""
+class CrawlEncodeTemplateVariable(StrEnum):
+    """Template variables for CrawlEncode tasks."""
 
     URL_STEM = 'url_stem'
     ACCESSION = 'accession'
@@ -121,15 +131,52 @@ class CrawlEncodeSpec(Spec):
         """
         self.scratchpad_ignore_missing = True
 
-    @field_validator('do', mode='after')
+    @field_validator('expand', mode='after')
     @classmethod
     def _check_patterns(cls, expand: CopySpec) -> CopySpec:
-        """Ensure that the `destination` field in the CopySpec contains required templated variables."""
-        if '${' + TemplateVariable.URL_STEM.value + '}' in expand.destination:
-            msg = f'COPY task `destination` must contain the `{TemplateVariable.URL_STEM.value}` templated variable.'
+        """Ensure that the `source` field in the CopySpec contains required templated variables."""
+        if '${' + CrawlEncodeTemplateVariable.URL_STEM.value + '}' not in expand.source:
+            msg = f'COPY task `source` must contain the `{CrawlEncodeTemplateVariable.URL_STEM.value}` template.'
             logger.error(msg)
-            raise ValueError(msg)
+            raise ValidationError(msg)
+
+        if '${' + CrawlEncodeTemplateVariable.ACCESSION.value + '}' not in expand.destination:
+            msg = f'COPY task `destination` must contain the `{CrawlEncodeTemplateVariable.ACCESSION.value}` template.'
+            logger.error(msg)
+            raise ValidationError(msg)
         return expand
+
+    def _resolve_destination(self, context: TaskContext) -> CopySpec:
+        """Resolve the destination path for the download.
+
+        Depending on whether `release_uri` is set in the global configuration,
+        the destination path will be adjusted to point to either a local path
+        or a GCS path.
+        """
+        release_uri = context.config.release_uri
+        if not release_uri:
+            logger.info('Transferring files to local path')
+            work = context.config.work_path
+            # Overwrite the destination to be local path
+            full_path = work / Path(self.expand.destination)
+            # Ensure the relative path exists
+            full_path.parent.mkdir(parents=True, exist_ok=True)
+            self.expand.destination = full_path.as_posix()
+
+        else:
+            logger.info(f'Transferring files to GCS path: {release_uri}')
+            if not release_uri.startswith('gs://'):
+                msg = f'release_uri must be a GCS path (gs://...), got: {release_uri}'
+                logger.error(msg)
+                raise GCSUploadError(msg)
+            else:
+                # Overwrite the destination to be GCS path
+                dest_path = Path(self.expand.destination)
+                # Sanitize the destination path to remove leading slashes
+                if dest_path.is_absolute():
+                    dest_path = dest_path.relative_to('/')
+                self.expand.destination = f'{release_uri}/{dest_path.as_posix()}'
+        return self.expand
 
 
 class CrawlEncode(Task):
@@ -149,54 +196,111 @@ class CrawlEncode(Task):
         self.spec: CrawlEncodeSpec
         self.manifest_local_path = context.config.work_path / Path(spec.manifest)
         self.scratchpad = Scratchpad({
-            TemplateVariable.ACCESSION.value: '',
-            TemplateVariable.URL_STEM.value: '',
+            CrawlEncodeTemplateVariable.ACCESSION.value: '',
+            CrawlEncodeTemplateVariable.URL_STEM.value: '',
         })
+        self.transfer_specs = []
 
     @staticmethod
-    async def _copy_all(specs_list: list[CopySpec], max_concurrent: int) -> None:
+    async def _transfer_all(specs_list: list[CopySpec], max_concurrent: int) -> None:
         """Fetch all files specified in the list of CopySpec asynchronously.
 
         :param specs_list: List of CopySpec to process.
         :param max_concurrent: Maximum number of concurrent downloads.
         """
         semaphore = asyncio.Semaphore(max_concurrent)
-        queue = asyncio.Queue()
         async with aiohttp.ClientSession() as session:
-            tasks = [CrawlEncode._copy(spec.source, spec.destination, session, semaphore) for spec in specs_list]
+            tasks = [CrawlEncode._transfer(spec.source, spec.destination, session, semaphore) for spec in specs_list]
             for f in tqdm(asyncio.as_completed(tasks), total=len(tasks), desc='Transferring files.'):
                 await f
 
     @staticmethod
-    async def _copy(
-        source: str, destination: str, session: aiohttp.ClientSession, semaphore: asyncio.Semaphore, retries: int = 3
+    async def _write_local_file(destination: str, response: aiohttp.ClientResponse) -> None:
+        """Write content to a local file.
+
+        There is no error handling in the local writer, as we would not expect failures.
+
+        :param destination: Local path to write to.
+        :param response: aiohttp ClientResponse with the content to write.
+        :raises IOError: If there is an error writing to the local file.
+        """
+        async with aiofiles.open(destination, 'wb') as fp:
+            async for chunk in response.content.iter_chunked(1024 * 1024):
+                await fp.write(chunk)
+
+    @staticmethod
+    async def _write_gcs_file(
+        destination: str, response: aiohttp.ClientResponse, session: aiohttp.ClientSession
     ) -> None:
-        """Asynchronously copy a file from source to destination using aiohttp."""
+        """Write content to GCS file.
+
+        This method consumes the response content and uploads it to GCS.
+
+        :param destination: GCS path to write to (gs://bucket/path).
+        :param response: aiohttp ClientResponse with the content to upload.
+        :param session: aiohttp ClientSession to use for requests.
+        :raises GCSUploadError: If there is an error uploading to GCS.
+        """
+        client = Storage(session=session)
+        bucket_name = destination.split('/')[2]
+        blob_name = '/'.join(destination.split('/')[3:])
+        logger.info(f'Uploading to GCS {destination}.')
+        try:
+            await client.upload(
+                bucket=bucket_name,
+                object_name=blob_name,
+                file_data=await response.read(),
+                content_type=response.headers.get('Content-Type'),
+                session=session,
+            )
+        except Exception as e:
+            logger.error(f'Failed to upload to GCS {destination}: {e}')
+            raise GCSUploadError(f'Failed to upload to GCS {destination}.') from e
+
+    @staticmethod
+    async def _transfer(
+        source: str,
+        destination: str,
+        session: aiohttp.ClientSession,
+        semaphore: asyncio.Semaphore,
+        retries: int = 3,
+    ) -> None:
+        """Asynchronously copy a file from source to destination using aiohttp.
+
+        param source: Source URL to download from.
+        param destination: Destination path to write to (local path or gs:// path).
+        param session: aiohttp ClientSession to use for requests.
+        param semaphore: Semaphore to limit concurrent downloads.
+        param retries: Number of retries for failed downloads.
+        """
         async with semaphore:
             for attempt in range(retries):
                 try:
                     async with session.get(source, timeout=aiohttp.ClientTimeout(total=600)) as response:
                         response.raise_for_status()
-                        async with aiofiles.open(destination, 'wb') as fp:
-                            async for chunk in response.content.iter_chunked(1024 * 1024):
-                                await fp.write(chunk)
-                    return  # Success, exit the function
+                        if destination.startswith('gs://'):
+                            await CrawlEncode._write_gcs_file(destination, response, session)
+                        else:
+                            await CrawlEncode._write_local_file(destination, response)
+                    return
                 except ClientError as e:
-                    logger.warning(f'Attempt {attempt + 1} failed to download {source}: {e}')
+                    logger.warning(f'Attempt {attempt + 1} failed to fetch {source}: {e}')
                     if attempt == retries - 1:
                         logger.error(f'All {retries} attempts failed for {source}.')
-                        raise
+                        raise HTTPAsyncDownloadError(f'Failed to download {source} after {retries} attempts.') from e
                     await asyncio.sleep(1 + attempt * 2)  # Exponential backoff
 
     @report
     def run(self) -> Self:
-        """Run the ENCODE file download task."""
+        """Run the ENCODE file download task.
+
+        :return: Self instance.
+        """
         logger.info(f'Parsing ENCODE manifest file from {self.spec.manifest}.')
         file_stems = self.spec.columns.parse_manifest(self.manifest_local_path)
         logger.info(f'Found {len(file_stems)} files to download.')
-        template_spec = self.spec.expand
         # Loop over each file stem
-        specs = []
+        resolved_template_spec = self.spec._resolve_destination(self.context)
         for accession, url_stem in file_stems.items():
             logger.info(f'Building task for experiment: {accession} from {url_stem} file.')
             self.scratchpad.store('accession', accession)
@@ -204,11 +308,19 @@ class CrawlEncode(Task):
 
             # Substitute values in CopySpec and enqueue new tasks
             # Create a new CopySpec with the current scratchpad values
-            subtask_spec = template_spec.model_validate(self.scratchpad.replace_dict(template_spec.model_dump()))
-            specs.append(subtask_spec)
+            subtask_spec = resolved_template_spec.model_validate(
+                self.scratchpad.replace_dict(resolved_template_spec.model_dump())
+            )
+            self.transfer_specs.append(subtask_spec)
+        asyncio.run(self._transfer_all(self.transfer_specs, max_concurrent=5))
+        logger.info(f'Enqueued {len(self.transfer_specs)} download tasks from ENCODE manifest.')
 
-        self._
+        return self
 
-        logger.info(f'Enqueued {len(specs)} download tasks from ENCODE manifest.')
-
+    @report
+    def validate(self) -> Self:
+        """Check that the downloaded file exists and has a valid size."""
+        all_exist = all_blobs_exist if self.context.config.release_uri else all_files_exist
+        paths = [spec.destination for spec in self.transfer_specs]
+        v(all_exist, paths)
         return self

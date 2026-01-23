@@ -68,16 +68,6 @@ steps:
       source: ${latest_drugbank_annotation}
       destination: input/drug/drugbank.csv.gz
 
-    - name: elasticsearch chembl drug indication
-      url: https://www.ebi.ac.uk/chembl/elk/es
-      destination: input/drug/chembl_drug_indication.jsonl
-      index: chembl_${chembl_version}_drug_indication
-      fields:
-        - _metadata
-        - molecule_chembl_id
-        - efo_id
-        - max_phase_for_ind
-        - indication_refs
     - name: elasticsearch chembl drug warning
       url: https://www.ebi.ac.uk/chembl/elk/es
       destination: input/drug/chembl_drug_warning.jsonl

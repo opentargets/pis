@@ -3,7 +3,7 @@ work_path: ./work
 log_level: INFO
 pool_size: 16
 
-release_uri: gs://ot_orchestration/pis/encode
+# release_uri: gs://ot_orchestration/pis/encode
 scratchpad:
   chembl_version: '36'
   efo_version: '3.83.0'
@@ -939,7 +939,8 @@ steps:
 
   encode_rE2G:
     - name: copy encode rE2G manifest
-      source: https://www.encodeproject.org/report.tsv?type=File&searchTerm=encode-re2g+thresholded&output_type=thresholded+element+gene+links&status=released&limit=all
+    # NOTE: excluded samples from query have divergent schemas that do not conform to expected rE2G format
+      source: https://www.encodeproject.org/report.tsv?type=File&searchTerm=encode-re2g+thresholded&output_type=thresholded+element+gene+links&status=released&limit=all&accession!=ENCFF094BVF&accession!=ENCFF269DKY
       destination: input/encode-rE2G/e2g_manifest.tsv
 
     - name: crawl_encode rE2G manifest
@@ -954,3 +955,20 @@ steps:
         source: https://www.encodeproject.org${url_stem}
         destination: input/encode-rE2G/${accession}.bed.gz
   ##################################################################################################
+
+  epiraction:
+    - name: copy encode epiraction manifest
+      source: https://www.encodeproject.org/report.tsv?type=File&searchTerm=epiraction+thresholded&output_type=thresholded+element+gene+links&status=released&limit=all
+      destination: input/epiraction/epiraction_manifest.tsv
+
+    - name: crawl_encode epiraction manifest
+      requires:
+        - copy encode epiraction manifest
+      manifest: input/epiraction/epiraction_manifest.tsv
+      columns:
+        accession: 'Accession'
+        url_stem:  'Download URL'
+      expand: # COPY task template
+        name: copy encode epiraction ${accession}
+        source: https://www.encodeproject.org${url_stem}
+        destination: input/epiraction/${accession}.bed.gz

@@ -1,17 +1,22 @@
 [project]
 name = "PIS"
-version = "25.12.0"
+version = "26.0.0-dev+3954.1"
 description = "Open Targets Pipeline Input Stage"
 readme = "README.md"
 requires-python = ">=3.11,<3.14"
 authors = [{ name = "Open Targets Core Team", email = "devs@opentargets.net" }]
 license = { text = "Apache-2.0" }
 dependencies = [
-  "elasticsearch==7.17.12",     # must be ^7.0.0 to be compatible with chembl es server
+  "aiofiles>=25.1.0",
+  "aiohttp>=3.13.3",
+  "asyncio>=4.0.0",
+  "elasticsearch==7.17.12",
+  "gcloud-aio-storage>=9.6.1",
   "jq==1.8.0",
   "loguru==0.7.3",
   "opentargets-otter==25.0.16",
   "requests>=2.32.4",
+  "tqdm>=4.67.1",
   "urllib3>=2.5.0",
 ]
 
@@ -48,7 +53,7 @@ include-package-data = false
 pis = "pis.core:main"
 
 [tool.pytest.ini_options]
-testpaths = ["src/test"]
+testpaths = ["test"]
 filterwarnings = "ignore:.*google._upb*" # warning from google protobuf library
 
 [tool.coverage.report]

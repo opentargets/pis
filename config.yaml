@@ -3,7 +3,7 @@ work_path: ./work
 log_level: INFO
 pool_size: 16
 
-release_uri: gs://ot_orchestration/pis/encode
+# release_uri: gs://ot_orchestration/pis/encode
 scratchpad:
   chembl_version: '36'
   efo_version: '3.83.0'

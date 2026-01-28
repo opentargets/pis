@@ -1032,7 +1032,7 @@ wheels = [
 
 [[package]]
 name = "pis"
-version = "26.1.0"
+version = "26.0.0.dev0+3954.1"
 source = { editable = "." }
 dependencies = [
     { name = "aiofiles" },

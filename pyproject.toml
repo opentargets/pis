@@ -1,65 +1,70 @@
 [project]
 name = "PIS"
-version = "26.03.0-dev.2"
+version = "26.03.0-dev.3"
 description = "Open Targets Pipeline Input Stage"
 readme = "README.md"
 requires-python = ">=3.11,<3.14"
 authors = [{ name = "Open Targets Core Team", email = "devs@opentargets.net" }]
 license = { text = "Apache-2.0" }
 dependencies = [
-  "aiofiles>=25.1.0",
-  "aiohttp>=3.13.3",
-  "asyncio>=4.0.0",
   "elasticsearch==7.17.12",
-  "gcloud-aio-storage>=9.6.1",
-  "jq==1.8.0",
+  "jq==1.11.0",
   "loguru==0.7.3",
-  "opentargets-otter==25.0.16",
-  "requests>=2.32.4",
-  "tqdm>=4.67.1",
+  "opentargets-otter==26.0.1",
   "urllib3>=2.5.0",
 ]
 
 [tool.uv]
-override-dependencies = ["urllib3>=2.2.0"]
+override-dependencies = ["urllib3>=2.5.0"]
 
 [dependency-groups]
-dev = ["ruff==0.9.6", "deptry==0.23.0"]
+dev = ["ruff==0.15.1", "deptry==0.24.0", "ty==0.0.17"]
 
 [project.optional-dependencies]
 test = [
-  "coverage==7.6.10",
-  "freezegun==1.5.1",
-  "pytest==8.3.4",
-  "pytest-mock==3.14.0",
+  "coverage==7.13.4",
+  "freezegun==1.5.5",
+  "pytest==9.0.2",
+  "pytest-asyncio==1.3.0",
+  "pytest-mock==3.15.1",
 ]
 docs = [
   "autodoc-pydantic>=2.2.0",
-  "sphinx-autobuild>=2024.10.3",
-  "sphinx-issues>=5.0.0",
+  "sphinx-autobuild>=2025.8.25",
+  "sphinx-issues>=5.0.1",
   "sphinx-rtd-theme>=3.0.2",
-  "sphinx>=8.1.3",
-  "esbonio>=0.16.5",
+  "sphinx>=8.2.3",
+  "esbonio>=1.0.0",
 ]
 
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
+[tool.hatch.build.targets.wheel]
+packages = ["src/pis"]
+
 [tool.setuptools]
 include-package-data = false
+
+[tool.setuptools.packages.find]
+exclude = ["**/*_test.py"]
 
 [project.scripts]
 pis = "pis.core:main"
 
 [tool.pytest.ini_options]
 testpaths = ["test"]
-filterwarnings = "ignore:.*google._upb*" # warning from google protobuf library
+markers = ["e2e: end-to-end tests (deselect with '-m \"not e2e\"')"]
+
+[tool.coverage.run]
+omit = ["test/*"]
 
 [tool.coverage.report]
 exclude_lines = ["pragma: no cover", "if TYPE_CHECKING:"]
 
 [tool.deptry]
+extend_exclude = ["src/test"]
 pep621_dev_dependency_groups = ["test", "docs"]
 
 [tool.ruff]
@@ -109,14 +114,14 @@ select = [
 ]
 
 ignore = [
-  'D1',      # allow lax documentation
+  'D107',    # we don't want to document every single init method
   'D213',    # we prefer D212
   'G004',    # we don't care about logging format
   'E226',    # allow omitting whitespace around arithmetic operators
   'E731',    # allow assigning lambdas (it's useful for single-line functions defined inside other functions)
   'RUF012',  # ultra-noisy and dicts in classvars are very common
   'RUF015',  # not always more readable
-  'UP038',   # it looks kind of weird and it slower than a tuple
+  'RUF067',  # we often put code inside init modules
   'S101',    # we use asserts outside tests, and do not run python with `-O` (also see B011)
   'S311',    # false positives, it does not care about the context
   'S324',    # all our md5/sha1 usages are for non-security purposes
@@ -143,6 +148,7 @@ ignore = [
   'PLC2701', # some private imports are needed
   'PLR09',   # too-many-<whatever> is just noisy
   'PLR0913', # very noisy
+  'PLR1702', # complexity might be warranted
   'PLR2004', # extremely noisy and generally annoying
   'PLR6201', # sets are faster (by a factor of 10!) but it's noisy and we're in nanoseconds territory
   'PLR6301', # extremely noisy and generally annoying
@@ -159,6 +165,7 @@ ignore = [
   'PERF203', # noisy, false positives, and not applicable for 3.11+
   'FURB113', # less readable
   'FURB140', # less readable and actually slower in 3.12+
+  'UP047',   # we need to support Python 3.11 for now
 ]
 
 extend-safe-fixes = [
@@ -188,10 +195,13 @@ parametrize-values-type = 'list'
 parametrize-values-row-type = 'tuple'
 
 [tool.ruff.lint.per-file-ignores]
-'**/*_test.py' = ['S108', 'S602', 'D']
+'test/**/*.py' = ['S108', 'S602', 'D']
 '**/__init__.py' = ['F401']
 '**/tasks/*.py' = ['D102']
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"
-ignore-decorators = ["pis.tasks.report", "pis.manifest.task_reporter.report"]
+ignore-decorators = [
+  "otter.tasks.report",
+  "otter.manifest.task_reporter.report",
+]

@@ -1,9 +1,9 @@
 {
   "recommendations": [
     "charliermarsh.ruff",
+    "astral-sh.ty",
     "ms-python.python",
     "ms-python.vscode-pylance",
-    "njpwerner.autodocstring",
     "redhat.vscode-yaml",
   ],
 }

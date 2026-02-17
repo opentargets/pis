@@ -5,6 +5,7 @@ from pathlib import Path
 
 from elasticsearch import Elasticsearch as Es
 from loguru import logger
+from otter.util.errors import TaskValidationError
 
 
 # fastest way to count lines is calling wc -l
@@ -17,7 +18,7 @@ def _wccount(filename) -> int:
     return int(out.partition(b' ')[0])
 
 
-def counts(url: str, index: str, local_path: Path) -> bool:
+def counts(url: str, index: str, local_path: Path) -> None:
     """Check if the document counts at the remote and local locations match.
 
     :param url: The URL of the ElasticSearch instance.
@@ -36,5 +37,5 @@ def counts(url: str, index: str, local_path: Path) -> bool:
     remote_doc_count = es.count(index=index)['count']
     local_doc_count = _wccount(local_path)
 
-    logger.debug(f'checking if {remote_doc_count} == {local_doc_count}')
-    return remote_doc_count == local_doc_count
+    if remote_doc_count != local_doc_count:
+        raise TaskValidationError(f'document counts do not match: {remote_doc_count} != {local_doc_count}')

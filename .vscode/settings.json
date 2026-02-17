@@ -1,4 +1,5 @@
 {
+  "editor.formatOnSave": true,
   "[python]": {
     "editor.defaultFormatter": "charliermarsh.ruff",
     "editor.tabSize": 4,
@@ -9,9 +10,7 @@
   "ruff.nativeServer": true,
   "ruff.lint.enable": true,
   "ruff.organizeImports": true,
-  "python.analysis.autoImportCompletions": true,
-  "python.analysis.typeCheckingMode": "standard",
-  "python.languageServer": "Pylance",
+  "python.languageServer": "None",
   "files.exclude": {
     "**/__pycache__": true,
     "**/.pytest_cache": true,
@@ -19,7 +18,6 @@
     "*.egg-info": true,
     "build": true,
   },
-  "autoDocstring.docstringFormat": "sphinx",
   "yaml.schemas": {
     "https://raw.githubusercontent.com/opentargets/otter/refs/heads/main/.vscode/config-schema.json": [
       "config.yaml"

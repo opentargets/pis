@@ -1,25 +1,19 @@
 """Download fields from all documents in ElasticSearch indexes."""
 
 import json
-import sys
-from pathlib import Path
+from io import IOBase
 from typing import Any, Self
 
-import elasticsearch
 import elasticsearch.helpers
 from elasticsearch import Elasticsearch as Es
 from elasticsearch.exceptions import ElasticsearchException
 from elasticsearch.helpers import ScanError
 from loguru import logger
 from otter.manifest.model import Artifact
-from otter.storage import get_remote_storage
+from otter.storage.synchronous.handle import StorageHandle
 from otter.task.model import Spec, Task, TaskContext
 from otter.task.task_reporter import report
 from otter.util.errors import OtterError, TaskAbortedError
-from otter.util.fs import check_destination
-from otter.validators import v
-
-from pis.validators.elasticsearch import counts
 
 BUFFER_SIZE = 20000
 
@@ -48,8 +42,8 @@ class ElasticsearchSpec(Spec):
 class Elasticsearch(Task):
     """Download fields from all documents in ElasticSearch indexes.
 
-    .. note:: `destination` will be prepended with the :py:obj:`otter.config.model.Config.release_uri`
-         config field.
+    .. note:: `destination` will be prepended with the
+        :py:obj:`otter.config.model.Config.release_uri` config field.
 
     If no `release_uri` is provided in the configuration, the results will only be
     stored locally. This is useful for local runs or debugging. The local path will
@@ -63,36 +57,28 @@ class Elasticsearch(Task):
         self.es: Es
         self.doc_count: int = 0
         self.doc_written: int = 0
-        self.local_path: Path = context.config.work_path / spec.destination
-        self.remote_uri: str | None = None
-        if context.config.release_uri:
-            self.remote_uri = f'{context.config.release_uri}/{spec.destination}'
-        self.destination = self.remote_uri or str(self.local_path)
 
     def _close_es(self) -> None:
         if hasattr(self, 'es'):
             self.es.close()
             del self.es
 
-    def _write_docs(self, docs: list[dict[str, Any]], destination: Path) -> None:
+    def _write_docs(self, docs: list[dict[str, Any]], f: IOBase) -> None:
         try:
-            with open(destination, 'a+') as f:
-                for d in docs:
-                    json.dump(d, f)
-                    f.write('\n')
+            for d in docs:
+                json.dump(d, f)
+                f.write('\n')
             self.doc_written += len(docs)
-
         except OSError as e:
             self._close_es()
-            raise ElasticsearchError(f'error writing to {destination}: {e}')
-
-        logger.debug(f'wrote {len(docs)} ({self.doc_written}/{self.doc_count}) documents to {destination}')
-        logger.debug(f'the dict was taking up {sys.getsizeof(docs)} bytes of memory')
+            raise ElasticsearchError(f'error writing to file: {e}')
+        logger.debug(f'wrote {len(docs)} ({self.doc_written}/{self.doc_count})')
         docs.clear()
 
     @report
-    def run(self) -> Self:
-        check_destination(self.local_path, delete=True)
+    async def run(self) -> Self:
+        d = StorageHandle(self.spec.destination, self.context.config)
+        dst = d.open('wt')
 
         logger.debug(f'connecting to elasticsearch at {self.spec.url}')
         try:
@@ -119,36 +105,17 @@ class Elasticsearch(Task):
                 buffer.append(hit['_source'])
                 if len(buffer) >= BUFFER_SIZE:
                     logger.trace('flushing buffer')
-                    self._write_docs(buffer, self.local_path)
+                    self._write_docs(buffer, dst)
                     buffer.clear()
-
                     # we can use this moment to check for abort signals and bail out
                     if self.context.abort and self.context.abort.is_set():
                         raise TaskAbortedError
         except ScanError as e:
             logger.warning(f'error scanning index {self.spec.index}: {e}')
             raise ElasticsearchError(f'error scanning index {self.spec.index}: {e}')
-
-        self._write_docs(buffer, self.local_path)
+        self._write_docs(buffer, dst)
         self._close_es()
         logger.debug('scan complete')
 
-        # upload the result to remote storage
-        if self.remote_uri:
-            remote_storage = get_remote_storage(self.remote_uri)
-            remote_storage.upload(self.local_path, self.remote_uri)
-        logger.debug('upload successful')
-
-        self.artifacts = [Artifact(source=f'{self.spec.url}/{self.spec.index}', destination=str(self.destination))]
-        return self
-
-    @report
-    def validate(self) -> Self:
-        v(
-            counts,
-            self.spec.url,
-            self.spec.index,
-            self.local_path,
-        )
-
+        self.artifacts = [Artifact(source=f'{self.spec.url}/{self.spec.index}', destination=d.absolute)]
         return self

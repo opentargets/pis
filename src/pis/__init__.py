@@ -1,1 +1,1 @@
-"""pis main module."""
+"""PIS main module."""

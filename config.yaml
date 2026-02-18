@@ -14,8 +14,91 @@ scratchpad:
   mondo_version: '2025-02-04'
   ot_curation: '25.12.2'
   probes_drugs_version: '02_2025'
+  gtex_version: '10'
 
 steps:
+  ##################################################################################################
+  #: BASELINE EXPRESSION STEP :#####################################################################
+  baseline_expression:
+    - name: copy GTEx TPM matrix
+      source: https://storage.googleapis.com/adult-gtex/bulk-gex/v${gtex_version}/rna-seq/GTEx_Analysis_v10_RNASeQCv2.4.2_gene_tpm.gct.gz
+      destination: input/baseline_expression/bulkRNAseq/GTEx/GTEx_Analysis_v10_RNASeQCv2.4.2_gene_tpm.gct.gz
+
+    - name: copy GTEx sample attributes
+      source: https://storage.googleapis.com/adult-gtex/annotations/v${gtex_version}/metadata-files/GTEx_Analysis_v10_Annotations_SampleAttributesDS.txt
+      destination: input/baseline_expression/bulkRNAseq/GTEx/GTEx_Analysis_v10_Annotations_SampleAttributesDS.txt
+
+    - name: copy GTEx subject phenotypes
+      source: https://storage.googleapis.com/adult-gtex/annotations/v${gtex_version}/metadata-files/GTEx_Analysis_v10_Annotations_SubjectPhenotypesDS.txt
+      destination: input/baseline_expression/bulkRNAseq/GTEx/GTEx_Analysis_v10_Annotations_SubjectPhenotypesDS.txt
+    
+    - name: explode DICE expression data
+      foreach:
+        - B_CELL_NAIVE_TPM.csv
+        - CD4_NAIVE_TPM.csv
+        - CD4_STIM_TPM.csv
+        - CD8_NAIVE_TPM.csv
+        - CD8_STIM_TPM.csv
+        - M2_TPM.csv
+        - MONOCYTES_TPM.csv
+        - NK_TPM.csv
+        - TFH_TPM.csv
+        - TH1_TPM.csv
+        - TH17_TPM.csv
+        - TH2_TPM.csv
+        - THSTAR_TPM.csv
+        - TREG_MEM_TPM.csv
+        - TREG_NAIVE_TPM.csv
+      do:
+        - name: copy DICE ${each}
+          source: https://dice-database.org/download/${each}
+          destination: input/baseline_expression/bulkRNAseq/DICE/${each}
+
+    - name: copy DICE ontology mapping
+      source: gs://ot-team/tobi/baseline_expression/data/DICE/DICE_ontology_mapping.txt
+      destination: input/baseline_expression/bulkRNAseq/DICE/DICE_ontology_mapping.txt
+
+    - name: copy celltype parent mapping
+      source: gs://ot-team/tobi/baseline_expression/data/celltype-parent_mapping.tsv
+      destination: input/baseline_expression/celltype-parent_mapping.tsv
+
+    - name: copy tissue parent mapping
+      source: gs://ot-team/tobi/baseline_expression/data/tissue-parent_mapping.tsv
+      destination: input/baseline_expression/tissue-parent_mapping.tsv
+
+    - name: copy Tabula Sapiens data
+      source: https://datasets.cellxgene.cziscience.com/5a495302-b7cd-4bf9-853e-95627b00bb03.h5ad
+      destination: input/baseline_expression/scRNAseq/tabula_sapiens-CxG.h5ad
+
+    - name: copy PRIDE tissue ontology mapping
+      source: gs://ot-team/tobi/baseline_expression/data/PRIDE/tissue-complete_mapping.tsv
+      destination: input/baseline_expression/MSproteomics/PRIDE/tissue-complete_mapping.tsv
+
+    - name: explode PRIDE proteomics data
+      foreach:
+        - PXD000561
+        - PXD000865
+        - PXD016999
+        - PXD020192
+      do:
+        - name: copy PRIDE ${each} ppb.json
+          source: gs://ot-team/tobi/baseline_expression/data/PRIDE/${each}/${each}_OpenTargets_ppb.json
+          destination: input/baseline_expression/MSproteomics/PRIDE/${each}/${each}_OpenTargets_ppb.json
+        - name: copy PRIDE ${each} ppb.txt
+          source: gs://ot-team/tobi/baseline_expression/data/PRIDE/${each}/${each}_OpenTargets_ppb.txt
+          destination: input/baseline_expression/MSproteomics/PRIDE/${each}/${each}_OpenTargets_ppb.txt
+        - name: copy PRIDE ${each} sdrf.json
+          source: gs://ot-team/tobi/baseline_expression/data/PRIDE/${each}/${each}_OpenTargets_sdrf.json
+          destination: input/baseline_expression/MSproteomics/PRIDE/${each}/${each}_OpenTargets_sdrf.json
+        - name: copy PRIDE ${each} individuals.txt
+          source: gs://ot-team/tobi/baseline_expression/data/PRIDE/${each}/${each}_individuals.txt
+          destination: input/baseline_expression/MSproteomics/PRIDE/${each}/${each}_individuals.txt
+        - name: copy PRIDE ${each} tissues.txt
+          source: gs://ot-team/tobi/baseline_expression/data/PRIDE/${each}/${each}_tissues.txt
+          destination: input/baseline_expression/MSproteomics/PRIDE/${each}/${each}_tissues.txt
+
+  ##################################################################################################
+
   #: BIOSAMPLE STEP :###############################################################################
   biosample:
     - name: copy cell ontology

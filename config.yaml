@@ -921,22 +921,3 @@ steps:
       source: https://raw.githubusercontent.com/opentargets/target_engine/main/src/data_flow/phenotypeScores/20230825_mousePheScores.csv
       destination: input/target_engine/mouse_pheno_scores.csv
   ##################################################################################################
-
-  #: EPIRACTION STEP :##############################################################################
-  epiraction:
-    - name: copy encode epiraction manifest
-      source: https://www.encodeproject.org/report.tsv?type=File&searchTerm=epiraction+thresholded&output_type=thresholded+element+gene+links&status=released&limit=all
-      destination: input/epiraction/epiraction_manifest.tsv
-
-    - name: crawl_encode epiraction manifest
-      requires:
-        - copy encode epiraction manifest
-      source: input/epiraction/epiraction_manifest.tsv
-      destination: input/epiraction/source_list_file.txt
-
-    - name: copy_many encode epiraction datasets
-      requires:
-        - crawl_encode epiraction manifest
-      source_list_file: input/epiraction/source_list_file.txt
-      destination: input/epiraction/datasets
-  ##################################################################################################

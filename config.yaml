@@ -32,6 +32,16 @@ steps:
       destination: input/biosample/efo.json
   ##################################################################################################
 
+  #: CLINICAL_REPORT STEP :########################################################################
+  clinical_report:
+    - name: explode_glob clinical_report
+      glob: gs://ot-team/irene/clinical_mining/2026-03-02/input/clinical_report/**/**
+      do:
+        - name: copy clinical_report ${match_stem} ${uuid}
+          source: ${uri}
+          destination: input/clinical_report/${match_path}/${match_stem}.${match_ext}
+  ##################################################################################################
+
   #: DISEASE STEP :#################################################################################
   disease:
     - name: copy efo otar_slim

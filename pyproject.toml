@@ -1,6 +1,6 @@
 [project]
 name = "PIS"
-version = "26.03.0-dev.5"
+version = "26.03.0-dev.6"
 description = "Open Targets Pipeline Input Stage"
 readme = "README.md"
 requires-python = ">=3.11,<3.14"
@@ -10,7 +10,7 @@ dependencies = [
   "elasticsearch==7.17.12",
   "jq==1.11.0",
   "loguru==0.7.3",
-  "opentargets-otter==26.0.1",
+  "opentargets-otter==26.3.3",
   "requests>=2.32.5",
   "urllib3>=2.5.0",
 ]

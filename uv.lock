@@ -1032,7 +1032,7 @@ wheels = [
 
 [[package]]
 name = "opentargets-otter"
-version = "26.0.1"
+version = "26.3.3"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "filelock" },
@@ -1045,9 +1045,9 @@ dependencies = [
     { name = "requests" },
     { name = "urllib3" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/e9/9e/780d44cc56e6c2e730ec45957cb4f1722ba02f2ef79a629ca2ae02fc8b22/opentargets_otter-26.0.1.tar.gz", hash = "sha256:6478c4d77a71a19ece27249efbe441708ff69cdf4044e9bf0fbc32ef3882f5af", size = 207190, upload-time = "2026-02-19T16:07:37.012Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/48/1c/bb0143436764caeb58c0fb020e99566ee69acbcdf97c3f386e1c1146cd56/opentargets_otter-26.3.3.tar.gz", hash = "sha256:d349b5d26325f2e679b74ac5c3641f1d61e9b3c07ca5b8e237523f796aaadd3a", size = 207713, upload-time = "2026-03-03T14:20:51.631Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/83/ba/bc46ccc39e9c007ddf571b56c6b2e0200c9d3fb284c2c1b931c84fed2314/opentargets_otter-26.0.1-py3-none-any.whl", hash = "sha256:c1f0af91be0233ab826e82d0cd07b40a2da3d6e0cb2529592a2b2fcc3a8eb2d9", size = 66925, upload-time = "2026-02-19T16:07:35.291Z" },
+    { url = "https://files.pythonhosted.org/packages/5b/4b/171dd942c9b016fae5dcd29b37260c483beee7f582fcfe9247397543a996/opentargets_otter-26.3.3-py3-none-any.whl", hash = "sha256:2ece942a49a5ed78e1664b00e332fcb8f8675c380e6a410fbf3ed2434c756f88", size = 67018, upload-time = "2026-03-03T14:20:50.408Z" },
 ]
 
 [[package]]
@@ -1061,7 +1061,7 @@ wheels = [
 
 [[package]]
 name = "pis"
-version = "26.3.0.dev5"
+version = "26.3.0.dev6"
 source = { editable = "." }
 dependencies = [
     { name = "elasticsearch" },
@@ -1106,7 +1106,7 @@ requires-dist = [
     { name = "freezegun", marker = "extra == 'test'", specifier = "==1.5.5" },
     { name = "jq", specifier = "==1.11.0" },
     { name = "loguru", specifier = "==0.7.3" },
-    { name = "opentargets-otter", specifier = "==26.0.1" },
+    { name = "opentargets-otter", specifier = "==26.3.3" },
     { name = "pytest", marker = "extra == 'test'", specifier = "==9.0.2" },
     { name = "pytest-asyncio", marker = "extra == 'test'", specifier = "==1.3.0" },
     { name = "pytest-mock", marker = "extra == 'test'", specifier = "==3.15.1" },

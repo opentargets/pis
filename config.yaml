@@ -1,5 +1,5 @@
 ---
-work_path: ./work
+work_path: ../pipeline_work
 
 log_level: DEBUG
 pool_size: 4
@@ -148,6 +148,7 @@ steps:
       fields:
         - mp_id
         - hp_id
+      strict: False
 
     - name: solr fetch mouse_model
       destination: input/impc

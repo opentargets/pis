@@ -35,6 +35,9 @@ class SolrSpec(Spec):
             SOLR collection.
         - fields: list[str]: Optional list of fields to include in the output.
             If not provided, all fields will be included.
+        - strict: bool: If True, the task will raise an error if validation fails.
+            If False, it will log a warning and continue.
+
     """
 
     destination: str
@@ -42,6 +45,7 @@ class SolrSpec(Spec):
     batch_size: int = 100000
     data_type: str
     fields: list[str] | None = None
+    strict: bool = True
 
 
 class Solr(Task):
@@ -76,13 +80,22 @@ class Solr(Task):
         }
 
         while start < count:
-            response = self.session.get(self.spec.url, params={**params, 'start': start}, stream=True)
+            response = self.session.get(
+                self.spec.url,
+                params={**params, 'start': start},
+                stream=True,
+            )
             response.raise_for_status()
             logger.trace(f'streaming {self.spec.data_type} rows {start}-{start + batch_size}')
             yield response
             start += batch_size
 
-    def _save_docs(self, response: requests.Response, file: IO, trim_header: bool = True) -> None:
+    def _save_docs(
+        self,
+        response: requests.Response,
+        file: IO,
+        trim_header: bool = True,
+    ) -> None:
         """Stream response chunks directly to file."""
         total_bytes = 0
         for chunk in response.iter_content(chunk_size=32768):
@@ -97,19 +110,33 @@ class Solr(Task):
     def run(self) -> Self:
         """Run the Solr data fetching task."""
         self.session = requests.Session()
-        self.session.mount('http://', HTTPAdapter(max_retries=Retry(total=5, backoff_factor=1)))
+        self.session.mount(
+            'http://',
+            HTTPAdapter(
+                max_retries=Retry(
+                    total=5,
+                    backoff_factor=1,
+                ),
+            ),
+        )
 
         h = StorageHandle(self.dst, self.context.config)
         dst = h.open('wb')
 
         for batch in self._fetch_docs():
-            self._save_docs(batch, dst, trim_header=dst.tell() > 0)
+            self._save_docs(batch, dst, trim_header=dst.tell() > 0)  # ty:ignore[invalid-argument-type]
         logger.info(f'fetched data type {self.spec.data_type} to {h.absolute}')
 
         return self
 
     @report
     def validate(self) -> Self:
-        counts(self.spec.url, self.spec.data_type, self.dst, self.context.config)
+        counts(
+            self.spec.url,
+            self.spec.data_type,
+            self.dst,
+            self.context.config,
+            strict=self.spec.strict,
+        )
 
         return self

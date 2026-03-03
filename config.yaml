@@ -478,7 +478,7 @@ steps:
       do:
         - name: copy ot_crispr ${match_stem} ${uuid}
           source: ${uri}
-          destination: input/evidence/ot_crispr/data/${match_path}${match_stem}.${match_ext}
+          destination: input/evidence/ot_crispr/data/${match_path}/${match_stem}.${match_ext}
   ##################################################################################################
 
   #: EXPRESSION STEP :##############################################################################
@@ -588,12 +588,9 @@ steps:
 
   #: L2G STEP :#####################################################################################
   l2g:
-    - name: explode_glob l2g gold_standard
-      glob: gs://genetics-portal-dev-analysis/yt4/2506_release/training_set/20250625_gentropy_paper_v1.json/*.json
-      do:
-        - name: copy l2g gold_standard ${match_stem}
-          source: ${match_prefix}/${match_path}${match_stem}.${match_ext}
-          destination: input/l2g/gold_standard.json/${uuid}.json
+    - name: copy_many l2g gold standard
+      sources: gs://genetics-portal-dev-analysis/yt4/2506_release/training_set/20250625_gentropy_paper_v1.json/*.json
+      destination: input/l2g/gold_standard.json
   ##################################################################################################
 
   #: LITERATURE STEP :##############################################################################
@@ -607,7 +604,7 @@ steps:
       glob: gs://otar000-evidence_input/literature_export/2026.03/*.json.gz
       do:
         - name: copy literature dating lut ${match_stem}
-          source: ${match_prefix}/${match_path}${match_stem}.${match_ext}
+          source: ${match_prefix}/${match_path}/${match_stem}.${match_ext}
           destination: input/literature/literature_export/${uuid}.json.gz
 
   ##################################################################################################

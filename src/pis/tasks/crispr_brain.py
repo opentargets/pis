@@ -92,7 +92,7 @@ class CrisprBrain(Task):
         session = requests.session()
         for study_id in study_ids:
             src = f'{self.spec.study_prefix_url}{quote(study_id)}.csv.gz'
-            h_study = StorageHandle(f'{self.dst_studies}{study_id}.csv.gz', self.context.config)
+            h_study = StorageHandle(f'{self.dst_studies}/{study_id}.csv.gz', self.context.config)
             dst = h_study.open('wb')
             response = session.get(src, timeout=60)
             response.raise_for_status()

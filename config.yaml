@@ -995,17 +995,17 @@ steps:
       destination: input/target/uniprot/uniprot-ssl.tsv.gz
   ##################################################################################################
 
-  #: TARGET_PRIORITIZATION STEP :###########################################################################
-  target_prioritization:
+  #: TARGET_PRIORITISATION STEP :###########################################################################
+  target_prioritisation:
     - name: copy protein atlas
       source: https://www.proteinatlas.org/download/proteinatlas.json.gz
-      destination: input/target_prioritization/proteinatlas.json.gz
+      destination: input/target_prioritisation/proteinatlas.json.gz
 
     - name: copy uniprot locations
       source: https://rest.uniprot.org/locations/stream?compressed=true&fields=id%2Cname%2Ccategory%2Cgene_ontologies%2Cpart_of%2Cis_a&format=tsv&query=%28%2A%29
-      destination: input/target_prioritization/uniprot_locations.tsv.gz
+      destination: input/target_prioritisation/uniprot_locations.tsv.gz
 
     - name: copy mouse phenotype scores
       source: https://raw.githubusercontent.com/opentargets/target_engine/main/src/data_flow/phenotypeScores/20230825_mousePheScores.csv
-      destination: input/target_prioritization/mouse_pheno_scores.csv
+      destination: input/target_prioritisation/mouse_pheno_scores.csv
   ##################################################################################################

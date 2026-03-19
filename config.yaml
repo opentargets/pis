@@ -43,7 +43,7 @@ steps:
   #: CLINICAL_REPORT STEP :########################################################################
   clinical_report:
     - name: explode_glob clinical_report
-      glob: gs://ot-team/irene/clinical_mining/2026-03-02/input/clinical_report/**/**
+      glob: gs://ot-team/irene/clinical_mining/2026-03-02/input/clinical_report/**/*
       do:
         - name: copy clinical_report ${match_stem} ${uuid}
           source: ${uri}
@@ -483,7 +483,7 @@ steps:
       destination: input/evidence/ot_crispr/config.tsv
 
     - name: explode_glob ot_crispr files
-      glob: 'gs://otar013-ppp/ot_crispr/input_data_filtered/**/**'
+      glob: 'gs://otar013-ppp/ot_crispr/input_data_filtered/**/*'
       do:
         - name: copy ot_crispr ${match_stem} ${uuid}
           source: ${uri}

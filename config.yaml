@@ -595,6 +595,52 @@ steps:
       destination: input/encode/rE2G/datasets
   ##################################################################################################
 
+  #: GWAS STEP :######################################################################################
+  gwas:
+    - name: copy_many GCCA study
+      sources: gs://gwas_catalog_top_hits/study_index/*.parquet
+      destination: input/gwas/study/gcca
+
+    - name: copy_many GCCA credible sets
+      sources: gs://gwas_catalog_top_hits/credible_sets/*.parquet
+      destination: input/gwas/credible_set/gcca
+
+    - name: copy_many GCSS pics study
+      sources: gs://gwas_catalog_sumstats_pics/study_index/*.parquet
+      destination: input/gwas/study/gcss_pics
+
+    - name: copy_many GCSS pics credible sets
+      sources: gs://gwas_catalog_sumstats_pics/credible_sets/*.parquet
+      destination: input/gwas/credible_set/gcss_pics
+
+    - name: copy_many GCSS susie study
+      sources: gs://gwas_catalog_sumstats_susie/study_index/*.parquet
+      destination: input/gwas/study/gcss_susie
+
+    - name: copy_many GCSS susie credible sets
+      sources: gs://gwas_catalog_sumstats_susie/credible_set_clean/20260130/*.parquet
+      destination: input/gwas/credible_set/gcss_susie
+
+    - name: copy_many finngen study
+      sources: gs://finngen_data/r12/study_index/*.parquet
+      destination: input/gwas/study/finngen
+
+    - name: copy_many finngen credible sets
+      sources: gs://finngen_data/r12/credible_set_datasets/susie/*.parquet
+      destination: input/gwas/credible_set/finngen
+  ##################################################################################################
+
+  #: GWAS PPP STEP :################################################################################
+  gwas_ppp:
+    - name: copy_many finngen-UKBB-MVP study
+      sources: gs://finngen_ukb_mvp_meta_data/study_index/*.parquet
+      destination: input/gwas/study/finngen_ukb_mvp
+
+    - name: copy_many finngen-UKBB-MVP credible sets
+      sources: gs://finngen_ukb_mvp_meta_data/credible_sets/*.parquet
+      destination: input/gwas/credible_set/finngen_ukb_mvp
+  ##################################################################################################
+
   #: L2G STEP :#####################################################################################
   l2g:
     - name: copy_many l2g gold standard
@@ -616,6 +662,63 @@ steps:
           source: ${match_prefix}/${match_path}/${match_stem}.${match_ext}
           destination: input/literature/literature_export/${uuid}.json.gz
 
+  ##################################################################################################
+
+  #: molQTL STEP: ##############################################################################
+  molqtl:
+    - name: copy_many eQTL Catalogue study
+      sources: gs://eqtl_catalogue_data/study_index/*.parquet
+      destination: input/molqtl/study/eqtl_catalogue
+
+    - name: copy_many eQTL Catalogue credible sets
+      sources: gs://eqtl_catalogue_data/credible_set_datasets/eqtl_catalogue_susie_patched_v2/*.parquet
+      destination: input/molqtl/credible_set/eqtl_catalogue
+
+    - name: copy_many UKBB PPP EUR study
+      sources: gs://ukb_ppp_eur_data/study_index/*.parquet
+      destination: input/molqtl/study/ukb_ppp_eur
+
+    - name: copy_many UKBB PPP EUR credible sets
+      sources: gs://ukb_ppp_eur_data/credible_set_clean/20250129/*.parquet
+      destination: input/molqtl/credible_set/ukb_ppp_eur
+  ##################################################################################################
+
+  #: molQTL PPP STEP: ##############################################################################
+  molqtl_ppp:
+    - name: explode otar2077 molqtl
+      foreach:
+        - microglia
+        - MAGE_OTAR
+        - IBDverse
+      do:
+        - name: copy_many molqtl ${each} study
+          sources: gs://eqtl_catalogue_processed_otar_internal_data/otar2077/${each}/gentropy/study_index/*/*.parquet
+          destination: input/molqtl/study/otar2077/${each}
+
+        - name: copy_many molqtl ${each} credible sets
+          sources: gs://eqtl_catalogue_processed_otar_internal_data/otar2077/${each}/gentropy/study_locus/*/*.parquet
+          destination: input/molqtl/credible_set/otar2077/${each}
+
+    - name: explode eQTLGen molqtl
+      foreach:
+        - single_cell_eqtl
+        - coeqtl
+      do:
+        - name: copy_many molqtl eQTLGen ${each} study
+          sources: gs://eqtlgen_data/${each}/260301/study_index/*.parquet
+          destination: input/molqtl/study/eQTLGen/${each}
+
+        - name: copy_many molqtl eQTLGen ${each} credible sets
+          sources: gs://eqtlgen_data/${each}/260301/credible_set/*.parquet
+          destination: input/molqtl/credible_set/eQTLGen/${each}  
+  
+    - name: copy_many molqtl eQTL Catalogue GTEx v10 study
+      sources: gs://eqtl_catalogue_processed_otar_internal_data/otar2077/GTEx_v10_majiq/gentropy/output/study_index/*/*.parquet
+      destination: input/molqtl/study/GTEx_v10
+
+    - name: copy_many molqtl eQTL Catalogue GTEx v10 credible sets
+      sources: gs://eqtl_catalogue_processed_otar_internal_data/otar2077/GTEx_v10_majiq/gentropy/output/study_locus/*/*.parquet
+      destination: input/molqtl/credible_set/GTEx_v10
   ##################################################################################################
 
   #: ONTOMA STEP :##################################################################################

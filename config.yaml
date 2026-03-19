@@ -32,6 +32,14 @@ steps:
       destination: input/biosample/efo.json
   ##################################################################################################
 
+  #: BASELINE_EXPRESSION_STEP :#####################################################################
+  baseline_expression:
+    - name: copy_many baseline expression
+      sources: gs://ot-team/tobi/baseline_expression/aggregated-new/merged/*.parquet
+      destination: output/baseline_expression/
+
+  #################################################################################################
+
   #: CLINICAL_REPORT STEP :########################################################################
   clinical_report:
     - name: explode_glob clinical_report

@@ -43,7 +43,7 @@ steps:
   #: CLINICAL_REPORT STEP :########################################################################
   clinical_report:
     - name: explode_glob clinical_report
-      glob: gs://ot-team/irene/clinical_mining/2026-03-02/input/clinical_report/**/*
+      glob: gs://ot-team/irene/clinical_mining/2026-03-12/input/clinical_report/**/*
       do:
         - name: copy clinical_report ${match_stem} ${uuid}
           source: ${uri}
@@ -258,6 +258,7 @@ steps:
         - find_latest cosmic
       source: ${latest_cosmic}
       destination: input/evidence/cosmic.json.gz
+  ##################################################################################################
 
   #: EVIDENCE_PROJECT_SCORE STEP :##################################################################
   evidence_project_score:
@@ -330,8 +331,8 @@ steps:
       destination: input/evidence/gene_burden/astrazeneca/azphewas-com-470k-phewas-quantitative
 
     - name: copy_many AZ parquet (binary)
-      sources: gs://otar000-evidence_input/GeneBurden/data_files/azphewas-com-470k-phewas-quantitative/*.parquet
-      destination: input/evidence/gene_burden/astrazeneca/azphewas-com-470k-phewas-quantitative
+      sources: gs://otar000-evidence_input/GeneBurden/data_files/azphewas-com-470k-phewas-binary/*.parquet
+      destination: input/evidence/gene_burden/astrazeneca/azphewas-com-470k-phewas-binary
 
     - name: explode AZ CSVs
       foreach:
@@ -645,14 +646,13 @@ steps:
   l2g:
     - name: copy_many l2g gold standard
       sources: gs://genetics-portal-dev-analysis/yt4/2506_release/training_set/20250625_gentropy_paper_v1.json/*.json
-      destination: input/l2g/gold_standard
+      destination: input/l2g/gold_standard.json
   ##################################################################################################
 
   #: LITERATURE STEP :##############################################################################
   literature:
     - name: copy literature
-      # source: https://ftp.ebi.ac.uk/pub/databases/pmc/DOI/PMID_PMCID_DOI.csv.gz - forbidden location
-      source: gs://otar025-epmc/PMID_PMCID_DOI/2025.12/PMID_PMCID_DOI.csv.gz
+      source: https://ftp.ebi.ac.uk/pub/databases/pmc/DOI/PMID_PMCID_DOI.csv.gz
       destination: input/literature/PMID_PMCID_DOI.csv.gz
 
     - name: explode_glob literature dating lut
@@ -705,13 +705,13 @@ steps:
         - coeqtl
       do:
         - name: copy_many molqtl eQTLGen ${each} study
-          sources: gs://eqtlgen_data/${each}/260301/study_index/*.parquet
+          sources: gs://eqtlgen_data/${each}/260326/study/*.parquet
           destination: input/molqtl/study/eQTLGen/${each}
 
         - name: copy_many molqtl eQTLGen ${each} credible sets
-          sources: gs://eqtlgen_data/${each}/260301/credible_set/*.parquet
-          destination: input/molqtl/credible_set/eQTLGen/${each}  
-  
+          sources: gs://eqtlgen_data/${each}/260326/credible_set/*.parquet
+          destination: input/molqtl/credible_set/eQTLGen/${each}
+
     - name: copy_many molqtl eQTL Catalogue GTEx v10 study
       sources: gs://eqtl_catalogue_processed_otar_internal_data/otar2077/GTEx_v10_majiq/gentropy/output/study_index/*/*.parquet
       destination: input/molqtl/study/GTEx_v10
@@ -995,7 +995,7 @@ steps:
       destination: input/target/uniprot/uniprot-ssl.tsv.gz
   ##################################################################################################
 
-  #: TARGET_PRIORITISATION STEP :###########################################################################
+  #: TARGET_PRIORITISATION STEP :###################################################################
   target_prioritisation:
     - name: copy protein atlas
       source: https://www.proteinatlas.org/download/proteinatlas.json.gz

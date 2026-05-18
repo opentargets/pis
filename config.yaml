@@ -133,13 +133,6 @@ steps:
     - name: copy efo
       source: https://github.com/EBISPOT/efo/releases/download/v${efo_version}/efo.json
       destination: input/biosample/efo.json
-  ##################################################################################################
-
-  #: BASELINE_EXPRESSION_STEP :#####################################################################
-  baseline_expression:
-    - name: copy_many baseline expression
-      sources: gs://ot-team/tobi/baseline_expression/aggregated-new/merged/*.parquet
-      destination: output/baseline_expression
 
   #################################################################################################
 
@@ -592,48 +585,7 @@ steps:
         - name: copy ot_crispr ${match_stem} ${uuid}
           source: ${uri}
           destination: input/evidence/ot_crispr/data/${match_path}/${match_stem}.${match_ext}
-  ##################################################################################################
 
-  #: EXPRESSION STEP :##############################################################################
-  expression:
-    - name: copy expression hierarchy
-      source: https://raw.githubusercontent.com/opentargets/expression_hierarchy/master/process/curation.tsv
-      destination: input/expression/expression_hierarchy_curation.tsv
-
-    - name: copy tissue translation map
-      source: https://raw.githubusercontent.com/opentargets/expression_hierarchy/master/process/map_with_efos.json
-      destination: input/expression/map_with_efos.json
-
-    - name: copy normal tissues
-      source: https://www.proteinatlas.org/download/tsv/normal_ihc_data.tsv.zip
-      destination: input/expression/normal_tissue.tsv.zip
-
-    - name: find_latest baseline expression binned
-      source: gs://atlas_baseline_expression/baseline_expression_binned
-      scratchpad_key: latest_baseline_expression_binned
-    - name: copy baseline expression binned
-      requires:
-        - find_latest baseline expression binned
-      source: ${latest_baseline_expression_binned}
-      destination: input/expression/baseline_expression_binned.tsv
-
-    - name: find_latest baseline expression counts
-      source: gs://atlas_baseline_expression/baseline_expression_counts
-      scratchpad_key: latest_baseline_expression_counts
-    - name: copy baseline expression counts
-      requires:
-        - find_latest baseline expression counts
-      source: ${latest_baseline_expression_counts}
-      destination: input/expression/baseline_expression_counts.tsv
-
-    - name: find_latest baseline expression zscore binned
-      source: gs://atlas_baseline_expression/baseline_expression_zscore_binned
-      scratchpad_key: latest_baseline_expression_zscore_binned
-    - name: copy baseline expression zscore binned
-      requires:
-        - find_latest baseline expression zscore binned
-      source: ${latest_baseline_expression_zscore_binned}
-      destination: input/expression/baseline_expression_zscore_binned.tsv
   ##################################################################################################
 
   #: GO STEP :######################################################################################

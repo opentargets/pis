@@ -8,9 +8,6 @@ authors = [{ name = "Open Targets Core Team", email = "devs@opentargets.net" }]
 license = { text = "Apache-2.0" }
 dependencies = [
   "elasticsearch==7.17.12",
-  "google-api-python-client>=2.196.0",
-  "google-auth-httplib2>=0.4.0",
-  "google-auth-oauthlib>=1.4.0",
   "jq==1.11.0",
   "loguru==0.7.3",
   "opentargets-otter==26.3.3",

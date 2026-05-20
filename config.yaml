@@ -5,16 +5,16 @@ log_level: DEBUG
 pool_size: 4
 
 scratchpad:
-  chembl_version: '36'
-  efo_version: '3.83.0'
-  ensembl_version: '115'
-  gencode_version: '49'
-  depmap_version: '2025Q2'
-  hpo_version: '2025-01-16'
-  mondo_version: '2025-02-04'
-  ot_curation: '25.12.2'
-  probes_drugs_version: '02_2025'
-  gnomad_version: '4.1'
+  chembl_version: "36"
+  efo_version: "3.83.0"
+  ensembl_version: "115"
+  gencode_version: "49"
+  depmap_version: "2025Q2"
+  hpo_version: "2025-01-16"
+  mondo_version: "2025-02-04"
+  ot_curation: "25.12.2"
+  probes_drugs_version: "02_2025"
+  gnomad_version: "4.1"
 
 steps:
   #: BIOSAMPLE STEP :###############################################################################
@@ -218,7 +218,7 @@ steps:
   evidence_expression_atlas:
     - name: find_latest atlas
       source: gs://otar010-atlas
-      scratchpad_key: 'latest_atlas'
+      scratchpad_key: "latest_atlas"
     - name: copy atlas
       requires:
         - find_latest atlas
@@ -252,7 +252,7 @@ steps:
   evidence_cosmic:
     - name: find_latest cosmic
       source: gs://otar007-cosmic
-      scratchpad_key: 'latest_cosmic'
+      scratchpad_key: "latest_cosmic"
     - name: copy cosmic
       requires:
         - find_latest cosmic
@@ -297,7 +297,7 @@ steps:
   evidence_eva:
     - name: find_latest eva
       source: gs://otar012-eva/disease-target-evidence/*
-      scratchpad_key: 'latest_eva'
+      scratchpad_key: "latest_eva"
     - name: copy eva
       requires:
         - find_latest eva
@@ -312,7 +312,7 @@ steps:
       destination: input/evidence/gene_burden/cvdi.xlsx
 
     - name: explode_glob download genebass
-      glob: 'gs://otar000-evidence_input/GeneBurden/data_files/genebass_entries/*.parquet'
+      glob: "gs://otar000-evidence_input/GeneBurden/data_files/genebass_entries/*.parquet"
       do:
         - name: copy genebass ${match_stem}
           source: ${uri}
@@ -408,7 +408,7 @@ steps:
   evidence_reactome:
     - name: find_latest reactome
       source: gs://otar006-reactome
-      scratchpad_key: 'latest_reactome'
+      scratchpad_key: "latest_reactome"
     - name: copy reactome
       requires:
         - find_latest reactome
@@ -420,7 +420,7 @@ steps:
   evidence_uniprot_literature:
     - name: find_latest uniprot literature
       source: gs://otar000-evidence_input/Uniprot_literature/json
-      scratchpad_key: 'latest_uniprot_literature'
+      scratchpad_key: "latest_uniprot_literature"
     - name: copy uniprot_literature
       requires:
         - find_latest uniprot literature
@@ -432,7 +432,7 @@ steps:
   evidence_uniprot_variants:
     - name: find_latest uniprot_variants
       source: gs://otar000-evidence_input/Uniprot_variants/json
-      scratchpad_key: 'latest_uniprot_variants'
+      scratchpad_key: "latest_uniprot_variants"
     - name: copy uniprot_variants
       requires:
         - find_latest uniprot_variants
@@ -484,7 +484,7 @@ steps:
       destination: input/evidence/ot_crispr/config.tsv
 
     - name: explode_glob ot_crispr files
-      glob: 'gs://otar013-ppp/ot_crispr/input_data_filtered/**/*'
+      glob: "gs://otar013-ppp/ot_crispr/input_data_filtered/**/*"
       do:
         - name: copy ot_crispr ${match_stem} ${uuid}
           source: ${uri}
@@ -751,8 +751,8 @@ steps:
       requires:
         - copy openfda archive manifest
       source: input/openfda/fda_events.json
-      jq_filter: '.results.drug.event.partitions[].file'
-      prefix: 'https://download.open.fda.gov/drug/event/'
+      jq_filter: ".results.drug.event.partitions[].file"
+      prefix: "https://download.open.fda.gov/drug/event/"
       do:
         - name: copy fda event ${each}
           source: ${prefix}${each}
@@ -761,12 +761,14 @@ steps:
 
   #: OTAR STEP :####################################################################################
   otar:
-    - name: copy otar meta spreadsheet
-      source: https://docs.google.com/spreadsheets/d/1CV_shXJy1ACM09HZBB_-3Nl6l_dfkrA26elMAF0ttHs/export?format=csv&gid=1179867447
+    - name: spreadsheet_download otar meta spreadsheet
+      sheet_id: 1CV_shXJy1ACM09HZBB_-3Nl6l_dfkrA26elMAF0ttHs
+      gid: "1179867447"
       destination: input/otar/otar_meta.csv
 
-    - name: copy otar project to efo spreadsheet
-      source: https://docs.google.com/spreadsheets/d/1CV_shXJy1ACM09HZBB_-3Nl6l_dfkrA26elMAF0ttHs/export?format=csv&gid=72910172
+    - name: spreadsheet_download otar project to efo spreadsheet
+      sheet_id: 1CV_shXJy1ACM09HZBB_-3Nl6l_dfkrA26elMAF0ttHs
+      gid: "72910172"
       destination: input/otar/otar_project_to_efo.csv
   ##################################################################################################
 
@@ -834,7 +836,7 @@ steps:
       destination: input/target/gencode/gencode.gff3.gz
 
     - name: explode_glob download essentiality files
-      glob: 'gs://otar000-evidence_input/Essentiality/DepMap/${depmap_version}/*.csv'
+      glob: "gs://otar000-evidence_input/Essentiality/DepMap/${depmap_version}/*.csv"
       do:
         - name: copy depmap ${match_stem}
           source: ${uri}
@@ -874,7 +876,7 @@ steps:
 
     - name: find_latest cosmic hallmark
       source: gs://otar007-cosmic/hallmarks
-      scratchpad_key: 'latest_cosmic_hallmark'
+      scratchpad_key: "latest_cosmic_hallmark"
     - name: copy cosmic
       requires:
         - find_latest cosmic hallmark

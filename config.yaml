@@ -101,20 +101,20 @@ steps:
         - tabula_sapiens/tissue_celltype
         - DICE/celltype
       do:
-        - name: copy processed ${dataset} aggregated expression
-          source: gs://baseline_expression/processed/aggregated/${dataset}/parquet
+        - name: copy_many processed ${dataset} aggregated expression
+          sources: gs://baseline_expression/processed/aggregated/${dataset}/parquet/*
           destination: intermediate/baseline_expression/aggregated/${dataset}/parquet
         # - name: copy processed ${dataset} unaggregated expression
         #   source: gs://baseline_expression/processed/unaggregated/${dataset}/parquet
         #   destination: intermediate/baseline_expression/unaggregated/${dataset}/parquet
 
-    - name: copy parent mapping
+    - name: explode parent mapping
       foreach:
         - celltype
         - tissue
       do:
         - name: copy parent mapping for ${each}
-          source: gs://baseline_expression/data/${each}-parent_mapping.tsv
+          source: gs://baseline_expression/parent_mappings/${each}-parent_mapping.tsv
           destination: input/baseline_expression/${each}-parent_mapping.tsv
 
 

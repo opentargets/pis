@@ -1,3 +1,5 @@
+"""Exports Google Spreadsheet's page as CSV."""
+
 from typing import Self
 
 from google.auth import default
@@ -10,7 +12,7 @@ from otter.util.errors import OtterError
 
 
 class SpreadsheetDownloadError(OtterError):
-    """Base class for Spreadsheet Download errors"""
+    """Base class for Spreadsheet Download errors."""
 
 
 class SpreadsheetDownloadSpec(Spec):
@@ -40,17 +42,12 @@ class SpreadsheetDownload(Task):
     destination field.
     """
 
-    def __init__(
-        self, spec: SpreadsheetDownloadSpec, context: TaskContext
-    ) -> None:
+    def __init__(self, spec: SpreadsheetDownloadSpec, context: TaskContext) -> None:
         super().__init__(spec, context)
 
     @report
     async def run(self) -> Self:
-        logger.debug(
-            f'exporting to csv gid: {self.spec.gid} '
-            f'from spreadsheet {self.spec.sheet_id}'
-        )
+        logger.debug(f'exporting to csv gid: {self.spec.gid} from spreadsheet {self.spec.sheet_id}')
 
         scopes = [
             'https://www.googleapis.com/auth/drive.readonly',
@@ -59,10 +56,7 @@ class SpreadsheetDownload(Task):
 
         try:
             creds, project = default(scopes=scopes)
-            logger.debug(
-                f'Using default credentials from '
-                f'environment (project: {project})'
-            )
+            logger.debug(f'Using default credentials from environment (project: {project})')
         except Exception as e:
             logger.error(f'Failed to load default credentials: {e}')
             raise SpreadsheetDownloadError(f'Failed to authenticate: {e}')
@@ -70,7 +64,9 @@ class SpreadsheetDownload(Task):
         session = AuthorizedSession(creds)
 
         logger.debug('exporting file')
-        export_url = f'https://docs.google.com/spreadsheets/d/{self.spec.sheet_id}/export?format=csv&gid={self.spec.gid}'
+        export_url = (
+            f'https://docs.google.com/spreadsheets/d/{self.spec.sheet_id}/export?format=csv&gid={self.spec.gid}'
+        )
 
         response = session.get(export_url)
 

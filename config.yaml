@@ -117,7 +117,6 @@ steps:
           source: gs://baseline_expression/parent_mappings/${each}-parent_mapping.tsv
           destination: input/baseline_expression/${each}-parent_mapping.tsv
 
-
   ##################################################################################################
 
   #: BIOSAMPLE STEP :###############################################################################
@@ -575,8 +574,9 @@ steps:
       destination: input/evidence/encore.json.gz
 
     # OT_crispr => generate evience.
-    - name: copy ot_crispr config
-      source: gs://otar013-ppp/PPP-evidence-configuration/raw_study_table.tsv
+    - name: spreadsheet_download otar crispr study spreadsheet
+      sheet_id: 1eow_rTizGY_Vda0Q-8sFNWCOyFkKRSUen1Em1ysPSiA
+      gid: '0'
       destination: input/evidence/ot_crispr/config.tsv
 
     - name: explode_glob ot_crispr files
@@ -816,12 +816,13 @@ steps:
 
   #: OTAR STEP :####################################################################################
   otar:
-    - name: copy otar meta spreadsheet
-      source: https://docs.google.com/spreadsheets/d/1CV_shXJy1ACM09HZBB_-3Nl6l_dfkrA26elMAF0ttHs/export?format=csv&gid=1179867447
+    - name: spreadsheet_download otar meta spreadsheet
+      sheet_id: 1CV_shXJy1ACM09HZBB_-3Nl6l_dfkrA26elMAF0ttHs
+      gid: '1179867447'
       destination: input/otar/otar_meta.csv
-
-    - name: copy otar project to efo spreadsheet
-      source: https://docs.google.com/spreadsheets/d/1CV_shXJy1ACM09HZBB_-3Nl6l_dfkrA26elMAF0ttHs/export?format=csv&gid=72910172
+    - name: spreadsheet_download otar project to efo spreadsheet
+      sheet_id: 1CV_shXJy1ACM09HZBB_-3Nl6l_dfkrA26elMAF0ttHs
+      gid: '72910172'
       destination: input/otar/otar_project_to_efo.csv
   ##################################################################################################
 

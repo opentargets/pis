@@ -984,14 +984,6 @@ steps:
       source: https://ftp.ncbi.nlm.nih.gov/gene/DATA/GENE_INFO/Mammalia/Homo_sapiens.gene_info.gz
       destination: input/target/ncbi/Homo_sapiens.gene_info.gz
 
-    - name: copy project score gene identifier
-      source: https://cog.sanger.ac.uk/cmp/download/gene_identifiers_latest.csv.gz
-      destination: input/target/project-scores/gene_identifiers_latest.csv.gz
-
-    - name: copy project score essentiality matrix
-      source: https://cog.sanger.ac.uk/cmp/download/essentiality_matrices.zip
-      destination: input/target/project-scores/essentiality_matrices.zip
-
     - name: copy reactome ensembl2reactome
       source: https://reactome.org/download/current/Ensembl2Reactome.txt
       destination: input/target/reactome/Ensembl2Reactome.txt

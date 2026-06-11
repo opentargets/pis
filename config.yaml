@@ -175,6 +175,13 @@ steps:
       source: https://ftp.ebi.ac.uk/pub/databases/chembl/UniChem/data/wholeSourceMapping/src_id1/src1src2.txt.gz
       destination: input/drug/drugbank.csv.gz
 
+    # AACT clinical-trial batch extraction — a standalone source consumed by
+    # chembl_molecule (and clinical_report). Downloaded in the drug step so
+    # chembl_molecule's existing pis_drug dependency covers it.
+    - name: copy_many aact extraction batch results
+      sources: gs://ot-team/irene/clinical_mining/aact_extraction_batch_result/output/*
+      destination: input/clinical_report/aact_extraction_batch_results
+
     - name: elasticsearch chembl drug warning
       url: https://www.ebi.ac.uk/chembl/elk/es
       destination: input/drug/chembl_drug_warning.jsonl

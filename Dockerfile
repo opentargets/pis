@@ -5,7 +5,7 @@
 #
 # docker run -v /path/to/credentials.json:/app/credentials.json -e GOOGLE_APPLICATION_CREDENTIALS=/app/credentials.json pis -s so
 
-FROM python:3.13.1-alpine3.21
+FROM python:3.13-alpine3.21
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /bin/uv
 
 ADD . /app

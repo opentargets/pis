@@ -16,8 +16,19 @@ scratchpad:
   probes_drugs_version: '02_2025'
   gnomad_version: '4.1'
   gtex_version: '10'
+  spark_nlp_version: '6.1.3'
 
 steps:
+  ##################################################################################################
+  #: SPARK-NLP JARS STEP :##########################################################################
+  # Stage the Spark-NLP fat jar into the release bucket so the pts Dataproc cluster can load it via
+  # spark.jars instead of resolving the package from Maven Central on every spark-submit.
+  # See opentargets/issues#4453.
+  spark_nlp_jars:
+    - name: copy spark-nlp fat jar
+      source: https://s3.amazonaws.com/auxdata.johnsnowlabs.com/public/jars/spark-nlp-assembly-${spark_nlp_version}.jar
+      destination: input/jars/spark-nlp-assembly-${spark_nlp_version}.jar
+
   ##################################################################################################
   #: BASELINE EXPRESSION STEP :#####################################################################
   baseline_expression_raw:
